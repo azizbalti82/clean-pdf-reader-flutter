@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -22,6 +24,7 @@ class _AppViewState extends State<AppView> {
   final scrollManager = Get.find<ScrollManager>();
   bool isSearchEnabled = false;
   TextEditingController searchController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -177,6 +180,7 @@ class _AppViewState extends State<AppView> {
             child: customInput(
               Theme.of(context),
               searchController,
+              _focusNode,
               "Search for pdf...",
               "",
               context,
@@ -220,6 +224,12 @@ class _AppViewState extends State<AppView> {
               onPressed: () {
                 setState(() {
                   isSearchEnabled = !isSearchEnabled;
+                });
+                //request keyboard
+                Timer(Duration(milliseconds: 300), () {
+                  if (mounted) {
+                    _focusNode.requestFocus();
+                  }
                 });
               },
               icon: SvgPicture.asset(

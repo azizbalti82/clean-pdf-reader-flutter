@@ -1,17 +1,25 @@
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
+import '../../../../../core/provider/lists_provider.dart';
+import '../../../../../core/provider/settings_provider.dart';
+import '../../../../../core/services/settings_service.dart';
 import '../../../../../core/utils/constants.dart';
 import '../../../../../core/widgets/form.dart';
 
 class MoreBottomSheetView extends StatelessWidget {
-  const MoreBottomSheetView({super.key});
+  MoreBottomSheetView({super.key});
+  SettingsProvider settingsProvider= Get.put(SettingsProvider());
+  PDFController pdfController = Get.put(PDFController());
+
+
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -37,19 +45,27 @@ class MoreBottomSheetView extends StatelessWidget {
                         PullDownMenuItem(
                           title: 'Name',
                           onTap: () {
-                            // Handle 2 columns
+                            SettingsService.saveSortType("name");
+                            settingsProvider.updateSortBy("name");
+                            pdfController.sort("name");
                           },
                         ),
                         PullDownMenuItem(
                           title: 'Date Added (new first)',
                           onTap: () {
-                            // Handle 3 columns
+                            SettingsService.saveSortType("date_new");
+                            settingsProvider.updateSortBy("date_new");
+                            pdfController.sort("date_new");
+
                           },
                         ),
                         PullDownMenuItem(
                           title: 'Date Added (old first)',
                           onTap: () {
-                            // Handle 4 columns
+                            SettingsService.saveSortType("date_old");
+                            settingsProvider.updateSortBy("date_old");
+                            pdfController.sort("date_old");
+
                           },
                         ),
                       ],
@@ -66,13 +82,15 @@ class MoreBottomSheetView extends StatelessWidget {
                         PullDownMenuItem(
                           title: 'Grid view',
                           onTap: () {
-                            // Handle 2 columns
+                            SettingsService.saveIsGrid(true);
+                            settingsProvider.updateIsGrid(true);
                           },
                         ),
                         PullDownMenuItem(
                           title: 'List view',
                           onTap: () {
-                            // Handle 3 columns
+                            SettingsService.saveIsGrid(false);
+                            settingsProvider.updateIsGrid(false);
                           },
                         ),
                       ],
@@ -89,19 +107,22 @@ class MoreBottomSheetView extends StatelessWidget {
                         PullDownMenuItem(
                           title: '2 Columns',
                           onTap: () {
-                            // Handle 2 columns
+                            SettingsService.saveGridCount(2);
+                            settingsProvider.updateColCount(2);
                           },
                         ),
                         PullDownMenuItem(
                           title: '3 Columns',
                           onTap: () {
-                            // Handle 3 columns
+                            SettingsService.saveGridCount(3);
+                            settingsProvider.updateColCount(3);
                           },
                         ),
                         PullDownMenuItem(
                           title: '4 Columns',
                           onTap: () {
-                            // Handle 4 columns
+                            SettingsService.saveGridCount(4);
+                            settingsProvider.updateColCount(4);
                           },
                         ),
                       ],

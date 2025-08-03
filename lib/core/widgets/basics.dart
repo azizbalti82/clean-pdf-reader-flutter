@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path;
 import 'package:pdf_reader/main.dart';
 
+import '../../features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
 import '../../features/pdf preview/presentation/views/pdf_preview_view.dart';
+import '../../features/pdf preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
+import '../provider/settings_provider.dart';
 
 Widget simpleAppBar(BuildContext context, {required String text}) {
   final colorScheme = Theme.of(context).colorScheme;
@@ -52,28 +56,32 @@ Widget booksGridView(
   String? icon,
   Function(String item)? onTap,
 }) {
+  SettingsProvider settingsProvider= Get.put(SettingsProvider());
+
   return LayoutBuilder(
     builder: (context, constraints) {
-      return GridView.builder(
-        shrinkWrap: true,
-        itemCount: list.length,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: gridCount,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio:
-              0.6, // Adjust this to control the overall card height
-        ),
-        itemBuilder: (context, index) {
-          final item = list[index];
-          return pdfItem(
-            filePath: item,
-            context: context,
-            onTap: () => onTap?.call(item),
-          );
-        },
-      );
+      return Obx(() {
+        return GridView.builder(
+          shrinkWrap: true,
+          itemCount: list.length,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: settingsProvider.colCount.value,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio:
+            0.6, // Adjust this to control the overall card height
+          ),
+          itemBuilder: (context, index) {
+            final item = list[index];
+            return pdfItem(
+              filePath: item,
+              context: context,
+              onTap: () => onTap?.call(item),
+            );
+          },
+        );
+      });
     },
   );
 }
@@ -109,6 +117,13 @@ Widget pdfItem({
   return GestureDetector(
     onTap: () async{
       await Get.to(PdfPreviewView(pdfPath: filePath,));
+    },
+    onLongPress: (){
+      showCupertinoModalBottomSheet(
+        topRadius: Radius.circular(25),
+        context: context,
+        builder: (context) => PdfOptionsBottomSheetView(path:filePath),
+      );
     },
     child: Container(
       decoration: BoxDecoration(
@@ -184,6 +199,13 @@ Widget pdfItemInline({
   return GestureDetector(
     onTap: () async{
       await Get.to(PdfPreviewView(pdfPath: filePath,));
+    },
+    onLongPress: (){
+      showCupertinoModalBottomSheet(
+        topRadius: Radius.circular(25),
+        context: context,
+        builder: (context) => PdfOptionsBottomSheetView(path:filePath),
+      );
     },
     child: Container(
       height: 80,

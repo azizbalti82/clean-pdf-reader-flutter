@@ -9,7 +9,7 @@ class SettingsService {
   }
 
   static Future<bool> getIsGrid() async {
-    return (await _prefs).getBool('is_grid') ?? true;
+    return (await _prefs).getBool('is_grid') ?? false;
   }
 
   static Future<void> saveGridCount(int value) async {
@@ -17,7 +17,7 @@ class SettingsService {
   }
 
   static Future<int> getGridCount() async {
-    return (await _prefs).getInt('grid_count') ?? 3;
+    return (await _prefs).getInt('grid_count') ?? 2;
   }
 
   static Future<void> saveSortType(String value) async {
@@ -25,7 +25,7 @@ class SettingsService {
   }
 
   static Future<String> getSortType() async {
-    return (await _prefs).getString('sort_type') ?? 'alphabetical';
+    return (await _prefs).getString('sort_type') ?? 'name';
   }
 
   static Future<Map<String, dynamic>> getAllSettings() async {

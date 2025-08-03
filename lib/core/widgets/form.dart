@@ -72,6 +72,7 @@ class CustomButtonOutline extends StatelessWidget {
 Widget customInput(
   ThemeData theme,
   TextEditingController controller,
+  FocusNode focusNode,
   String? placeholder,
   String? text,
   BuildContext context, {
@@ -87,6 +88,7 @@ Widget customInput(
       builder: (context, value, child) {
         return TextFormField(
           controller: controller,
+          focusNode: focusNode,
           obscureText: isPassword ? value : false,
           maxLines: 1,
           minLines: 1,

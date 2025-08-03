@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'core/getx_scroll_manager.dart';
 import 'core/provider/lists_provider.dart';
+import 'core/provider/settings_provider.dart';
 import 'core/services/settings_service.dart';
 import 'core/services/storage_service.dart';
 import 'core/utils/constants.dart';
@@ -12,14 +13,13 @@ import 'core/utils/theme_data.dart';
 import 'features/application/presentation/views/app_view.dart';
 import 'features/application/presentation/views/widgets/system_wrapper_view.dart';
 
-bool isGrid = true;
-int gridCount = 3;
-String sortType = 'name';
-
 Future<void> loadSettings() async {
-  isGrid = await SettingsService.getIsGrid();
-  gridCount = await SettingsService.getGridCount();
-  sortType = await SettingsService.getSortType();
+  bool isGrid = await SettingsService.getIsGrid();
+  int gridCount = await SettingsService.getGridCount();
+  String sortType = await SettingsService.getSortType();
+
+  final SettingsProvider settingsProvider = Get.put(SettingsProvider());
+  settingsProvider.initSettings(isGrid,sortType,gridCount);
 }
 
 void loadPDFs() async {
@@ -31,7 +31,8 @@ void loadPDFs() async {
 
     //init lists
     final PDFController pdfController = Get.put(PDFController());
-    pdfController.initAllPDF(pdfFiles);
+    final SettingsProvider settingsProvider = Get.put(SettingsProvider());
+    pdfController.initAllPDF(pdfFiles,settingsProvider.sortBy.value);
     pdfController.updateHomePDF(pdfFiles);
     pdfController.updateRecentPDF([]);
     pdfController.updateBookmarkPDF([]);
@@ -43,6 +44,7 @@ void loadPDFs() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Constants.packageInfo = await PackageInfo.fromPlatform();
+  Get.put(SettingsProvider());
   Get.put(PDFController());
   loadSettings();
   loadPDFs();
