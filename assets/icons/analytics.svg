@@ -1,0 +1,18 @@
+<?xml version="1.0" ?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 60 60" data-name="pie chart" id="pie_chart" xmlns="http://www.w3.org/2000/svg"><defs><style>
+      .cls-1 {
+        fill: #9f4c4c;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        fill: #bf873e;
+      }
+
+      .cls-3 {
+        fill: #5b75a0;
+      }
+    </style></defs><path class="cls-1" d="M550,842c-0.474,6.588-4.111,13.6-7.5,18L524,842h26Z" id="pie-chart" transform="translate(-490 -810)"/><path class="cls-2" d="M538.432,863.732A30.047,30.047,0,0,1,490,839.92c0-15.7,11.48-28.536,28-29.92v32Z" data-name="pie-chart copy 2" id="pie-chart_copy_2" transform="translate(-490 -810)"/><path class="cls-3" d="M522,810a30.058,30.058,0,0,1,28,28H522V810Z" data-name="pie-chart copy" id="pie-chart_copy" transform="translate(-490 -810)"/></svg>
