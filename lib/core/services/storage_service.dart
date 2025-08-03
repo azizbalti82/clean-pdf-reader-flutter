@@ -1,9 +1,8 @@
 import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 bool _isRequestingPermissions = false;
 
@@ -55,14 +54,19 @@ Future<void> searchAndroidDirectories(List<String> pdfFiles) async {
   }
 }
 
-Future<void> searchDirectoryForPdfs(Directory directory, List<String> pdfFiles) async {
+Future<void> searchDirectoryForPdfs(
+  Directory directory,
+  List<String> pdfFiles,
+) async {
   try {
-    await for (var entity in directory.list(recursive: true, followLinks: false)) {
+    await for (var entity in directory.list(
+      recursive: true,
+      followLinks: false,
+    )) {
       try {
         if (entity is File &&
             entity.path.toLowerCase().endsWith('.pdf') &&
             !pdfFiles.contains(entity.path)) {
-
           // Additional check to ensure file is accessible
           if (await entity.exists()) {
             pdfFiles.add(entity.path);
@@ -91,7 +95,10 @@ Future<List<String>> loadAllPdfFilesOptimized() async {
     } else {
       final directory = await getExternalStorageDirectory();
       if (directory != null) {
-        await searchDirectoryForPdfsOptimized(Directory(directory.path), pdfFiles);
+        await searchDirectoryForPdfsOptimized(
+          Directory(directory.path),
+          pdfFiles,
+        );
       }
     }
   } catch (e) {
@@ -126,9 +133,15 @@ Future<void> searchAndroidDirectoriesOptimized(Set<String> pdfFiles) async {
   );
 }
 
-Future<void> searchDirectoryForPdfsOptimized(Directory directory, Set<String> pdfFiles) async {
+Future<void> searchDirectoryForPdfsOptimized(
+  Directory directory,
+  Set<String> pdfFiles,
+) async {
   try {
-    await for (var entity in directory.list(recursive: true, followLinks: false)) {
+    await for (var entity in directory.list(
+      recursive: true,
+      followLinks: false,
+    )) {
       try {
         if (entity is File && entity.path.toLowerCase().endsWith('.pdf')) {
           // Set automatically handles duplicates
@@ -145,6 +158,7 @@ Future<void> searchDirectoryForPdfsOptimized(Directory directory, Set<String> pd
     print("Error searching directory ${directory.path}: $e");
   }
 }
+
 Future<void> requestPermissions() async {
   // Prevent concurrent permission requests
   if (_isRequestingPermissions) return;
@@ -153,35 +167,34 @@ Future<void> requestPermissions() async {
 
   try {
     if (Platform.isAndroid) {
-
       // Check Android version and request appropriate permissions
       final androidInfo = await DeviceInfoPlugin().androidInfo;
       final sdkInt = androidInfo.version.sdkInt;
 
-      if (sdkInt >= 33) { // Android 13+
+      if (sdkInt >= 33) {
+        // Android 13+
         // For documents and PDFs, i need MANAGE_EXTERNAL_STORAGE
         if (await Permission.manageExternalStorage.isDenied) {
           await Permission.manageExternalStorage.request();
         }
-
-      } else if (sdkInt >= 30) { // Android 11-12
+      } else if (sdkInt >= 30) {
+        // Android 11-12
         // Request MANAGE_EXTERNAL_STORAGE for full access
-        var manageStorageStatus = await Permission.manageExternalStorage.request();
+        var manageStorageStatus = await Permission.manageExternalStorage
+            .request();
         if (!manageStorageStatus.isGranted) {
           // Fallback to regular storage permission
           await Permission.storage.request();
         }
-
-      } else { // Android 10 and below
+      } else {
+        // Android 10 and below
         // Request traditional storage permission
         await Permission.storage.request();
       }
-
     } else if (Platform.isIOS) {
       // iOS permissions
       await Permission.photos.request();
     }
-
   } catch (e) {
     print("Error requesting permissions: $e");
   } finally {

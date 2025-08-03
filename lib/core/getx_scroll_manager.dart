@@ -1,7 +1,5 @@
-import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 class ScrollManager extends GetxController {
   final ScrollController scrollController = ScrollController();

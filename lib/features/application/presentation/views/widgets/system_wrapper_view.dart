@@ -20,14 +20,15 @@ class SystemUiStyleWrapper extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: statusBarColor ?? theme.scaffoldBackgroundColor,
-        statusBarIconBrightness:
-        theme.brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: theme.brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
         systemNavigationBarColor: navBarColor ?? theme.scaffoldBackgroundColor,
-        systemNavigationBarIconBrightness:
-        theme.brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness: theme.brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
       ),
       child: child,
     );
   }
 }
-

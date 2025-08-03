@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/basics.dart';
-import '../../../application/presentation/views/widgets/system_wrapper_view.dart';
 
 class BookmarksView extends StatefulWidget {
   @override
@@ -14,18 +12,12 @@ class _State extends State<BookmarksView> {
     //load the content of the lesson
   }
 
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [],
-          ),
-        ),
-
+      padding: const EdgeInsets.all(20),
+      child: SingleChildScrollView(child: Column(children: [])),
     );
   }
 }

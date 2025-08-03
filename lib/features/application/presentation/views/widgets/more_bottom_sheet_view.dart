@@ -10,7 +10,8 @@ class MoreBottomSheetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -32,89 +33,89 @@ class MoreBottomSheetView extends StatelessWidget {
                   alignment: WrapAlignment.start,
                   children: [
                     PullDownButton(
-                        itemBuilder: (context) => [
-                          PullDownMenuItem(
-                            title: 'Name',
-                            onTap: () {
-                              // Handle 2 columns
-                            },
-                          ),
-                          PullDownMenuItem(
-                            title: 'Date Added (new first)',
-                            onTap: () {
-                              // Handle 3 columns
-                            },
-                          ),
-                          PullDownMenuItem(
-                            title: 'Date Added (old first)',
-                            onTap: () {
-                              // Handle 4 columns
-                            },
-                          ),
-                        ],
-                        buttonBuilder: (context, showMenu) => CustomButtonOutline(
-                          text: 'Sort By',
-                          icon: "sort",
-                          isFullRow: false,
-                          isLoading: false,
-                          onPressed: showMenu,
-                        )
+                      itemBuilder: (context) => [
+                        PullDownMenuItem(
+                          title: 'Name',
+                          onTap: () {
+                            // Handle 2 columns
+                          },
+                        ),
+                        PullDownMenuItem(
+                          title: 'Date Added (new first)',
+                          onTap: () {
+                            // Handle 3 columns
+                          },
+                        ),
+                        PullDownMenuItem(
+                          title: 'Date Added (old first)',
+                          onTap: () {
+                            // Handle 4 columns
+                          },
+                        ),
+                      ],
+                      buttonBuilder: (context, showMenu) => CustomButtonOutline(
+                        text: 'Sort By',
+                        icon: "sort",
+                        isFullRow: false,
+                        isLoading: false,
+                        onPressed: showMenu,
+                      ),
                     ),
                     PullDownButton(
-                        itemBuilder: (context) => [
-                          PullDownMenuItem(
-                            title: 'Grid view',
-                            onTap: () {
-                              // Handle 2 columns
-                            },
-                          ),
-                          PullDownMenuItem(
-                            title: 'List view',
-                            onTap: () {
-                              // Handle 3 columns
-                            },
-                          ),
-                        ],
-                        buttonBuilder: (context, showMenu) => CustomButtonOutline(
-                          text: 'Grid view',
-                          icon: "grid",
-                          isLoading: false,
-                          isFullRow: false,
-                          onPressed: showMenu,
-                        )
+                      itemBuilder: (context) => [
+                        PullDownMenuItem(
+                          title: 'Grid view',
+                          onTap: () {
+                            // Handle 2 columns
+                          },
+                        ),
+                        PullDownMenuItem(
+                          title: 'List view',
+                          onTap: () {
+                            // Handle 3 columns
+                          },
+                        ),
+                      ],
+                      buttonBuilder: (context, showMenu) => CustomButtonOutline(
+                        text: 'Grid view',
+                        icon: "grid",
+                        isLoading: false,
+                        isFullRow: false,
+                        onPressed: showMenu,
+                      ),
                     ),
                     PullDownButton(
-                        itemBuilder: (context) => [
-                          PullDownMenuItem(
-                            title: '2 Columns',
-                            onTap: () {
-                              // Handle 2 columns
-                            },
-                          ),
-                          PullDownMenuItem(
-                            title: '3 Columns',
-                            onTap: () {
-                              // Handle 3 columns
-                            },
-                          ),
-                          PullDownMenuItem(
-                            title: '4 Columns',
-                            onTap: () {
-                              // Handle 4 columns
-                            },
-                          ),
-                        ],
-                        buttonBuilder: (context, showMenu) => CustomButtonOutline(
-                          text: 'Column count',
-                          icon: "grid_count",
-                          isLoading: false,
-                          isFullRow: false,
-                          onPressed: showMenu,
-                        )
+                      itemBuilder: (context) => [
+                        PullDownMenuItem(
+                          title: '2 Columns',
+                          onTap: () {
+                            // Handle 2 columns
+                          },
+                        ),
+                        PullDownMenuItem(
+                          title: '3 Columns',
+                          onTap: () {
+                            // Handle 3 columns
+                          },
+                        ),
+                        PullDownMenuItem(
+                          title: '4 Columns',
+                          onTap: () {
+                            // Handle 4 columns
+                          },
+                        ),
+                      ],
+                      buttonBuilder: (context, showMenu) => CustomButtonOutline(
+                        text: 'Column count',
+                        icon: "grid_count",
+                        isLoading: false,
+                        isFullRow: false,
+                        onPressed: showMenu,
+                      ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
 
@@ -150,10 +151,7 @@ class MoreBottomSheetView extends StatelessWidget {
                       icon: 'github',
                       isLoading: false,
                       onPressed: () async {
-                        await EasyLauncher.url(
-                          url:
-                          "",
-                        );
+                        await EasyLauncher.url(url: "");
                       },
                     ),
                   ),
@@ -166,8 +164,7 @@ class MoreBottomSheetView extends StatelessWidget {
                   isLoading: false,
                   onPressed: () async {
                     await EasyLauncher.url(
-                      url:
-                      "https://azizbalti.netlify.app",
+                      url: "https://azizbalti.netlify.app",
                     );
                   },
                 ),
@@ -186,10 +183,11 @@ class MoreBottomSheetView extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             '${Constants.packageInfo?.version ?? ''}b${Constants.packageInfo?.buildNumber ?? ''}',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 10),
-
         ],
       ),
     );
@@ -202,26 +200,35 @@ class MoreBottomSheetView extends StatelessWidget {
         CircleAvatar(
           radius: 50,
           backgroundColor: Colors.white,
-          child: Image.asset("assets/logo/logo.png",width: 70, fit: BoxFit.cover),
+          child: Image.asset(
+            "assets/logo/logo.png",
+            width: 70,
+            fit: BoxFit.cover,
+          ),
         ),
       ],
     );
   }
 
   Widget _buildSection(
-      BuildContext context, {
-        required String title,
-        required IconData icon,
-        String? content,
-        List<Widget>? children,
-        bool isVertical = true,
-      }) {
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    String? content,
+    List<Widget>? children,
+    bool isVertical = true,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     final items = <Widget>[
       if (content != null) ...[
-        Text(content, style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+        Text(
+          content,
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
       ],
       if (children != null) ...children,
     ];
@@ -251,24 +258,30 @@ class MoreBottomSheetView extends StatelessWidget {
             const SizedBox(height: 20),
             isVertical
                 ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: items
-                  .map((item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: item,
-              ))
-                  .toList(),
-            )
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: items
+                        .map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            child: item,
+                          ),
+                        )
+                        .toList(),
+                  )
                 : Row(
-              children: items
-                  .map((item) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: item,
-                ),
-              ))
-                  .toList(),
-            )
+                    children: items
+                        .map(
+                          (item) => Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: item,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
           ],
         ),
       ),
@@ -284,7 +297,8 @@ class MoreBottomSheetView extends StatelessWidget {
         isLoading: false,
         onPressed: () async {
           await EasyLauncher.url(
-            url: "https://play.google.com/store/apps/details?id=com.baltcode.watchy",
+            url:
+                "https://play.google.com/store/apps/details?id=com.baltcode.watchy",
           );
         },
       ),
@@ -293,7 +307,8 @@ class MoreBottomSheetView extends StatelessWidget {
         isLoading: false,
         onPressed: () async {
           await EasyLauncher.url(
-            url: "https://azizbalti.netlify.app/projects/lingua/it/privacy.html",
+            url:
+                "https://azizbalti.netlify.app/projects/lingua/it/privacy.html",
           );
         },
       ),

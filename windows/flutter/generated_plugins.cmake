@@ -6,8 +6,10 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_tts
   pdfx
   permission_handler_windows
+  screen_retriever_windows
   simple_animation_progress_bar
   url_launcher_windows
+  window_manager
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

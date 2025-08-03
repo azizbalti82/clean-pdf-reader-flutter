@@ -1,7 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:toastification/toastification.dart';
 
 class CardWidget extends StatelessWidget {
   final String title;
@@ -29,19 +27,19 @@ class CardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color errorColor = Theme.of(context).colorScheme.error;
 
-    final Color effectiveColor = color ?? Theme.of(context).colorScheme.secondary;
-    final TextStyle subtitleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
-    ) ?? const TextStyle(fontSize: 13);
+    final Color effectiveColor =
+        color ?? Theme.of(context).colorScheme.secondary;
+    final TextStyle subtitleStyle =
+        Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+        ) ??
+        const TextStyle(fontSize: 13);
 
     return Container(
       decoration: BoxDecoration(
         color: effectiveColor.withOpacity(0.1),
         border: Border(
-          bottom: BorderSide(
-            color: effectiveColor.withOpacity(0.2),
-            width: 2,
-          ),
+          bottom: BorderSide(color: effectiveColor.withOpacity(0.2), width: 2),
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -75,24 +73,21 @@ class CardWidget extends StatelessWidget {
                       color: effectiveColor,
                     ),
                   ),
-                if (iconPath != null)
-                  const SizedBox(width: 24),
+                if (iconPath != null) const SizedBox(width: 24),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                       ),
                       const SizedBox(height: 5),
-                      Text(
-                        subtitle,
-                        style: subtitleStyle,
-                      ),
+                      Text(subtitle, style: subtitleStyle),
                     ],
                   ),
                 ),
@@ -109,6 +104,7 @@ class CardWidget extends StatelessWidget {
     );
   }
 }
+
 class CardSquareWidget extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -131,14 +127,18 @@ class CardSquareWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color accentColor = Theme.of(context).colorScheme.primary;
     final Color errorColor = Theme.of(context).colorScheme.error;
-    final TextStyle titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
-    ) ?? const TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
+    final TextStyle titleStyle =
+        Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ) ??
+        const TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
 
-    final TextStyle subtitleStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
-    ) ?? const TextStyle(fontSize: 22);
+    final TextStyle subtitleStyle =
+        Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+        ) ??
+        const TextStyle(fontSize: 22);
 
     return Stack(
       children: [
@@ -146,10 +146,7 @@ class CardSquareWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: accentColor.withOpacity(0.08),
             border: Border(
-              bottom: BorderSide(
-                color: accentColor.withOpacity(0.2),
-                width: 2,
-              ),
+              bottom: BorderSide(color: accentColor.withOpacity(0.2), width: 2),
             ),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -183,8 +180,7 @@ class CardSquareWidget extends StatelessWidget {
                           color: accentColor,
                         ),
                       ),
-                    if (iconPath != null)
-                      const SizedBox(width: 24),
+                    if (iconPath != null) const SizedBox(width: 24),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,

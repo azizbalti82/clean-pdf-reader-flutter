@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:pdf_reader/features/application/presentation/views/widgets/current_level_view.dart';
-import 'package:pdf_reader/features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
-import 'package:pdf_reader/features/home/presentation/views/home_view.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
-
-import '../../../../core/getx_scroll_manager.dart';
-import '../../../../core/utils/assets_data.dart';
 import 'package:get/get.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:pdf_reader/features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
+import '../../../../core/getx_scroll_manager.dart';
+import '../../../../core/provider/lists_provider.dart';
+import '../../../../core/utils/assets_data.dart';
+import '../../../../core/widgets/form.dart';
+import '../../../home/presentation/views/home_view.dart';
 
 class AppView extends StatefulWidget {
   const AppView({super.key});
@@ -21,11 +20,13 @@ class _AppViewState extends State<AppView> {
   int _currentIndex = 0;
   late final List<Widget> _screens;
   final scrollManager = Get.find<ScrollManager>();
+  bool isSearchEnabled = false;
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _screens = const [HomeView(), HomeView(), HomeView(), HomeView()];
+    _screens = const [HomeView(type:"home"), HomeView(type:"recent"), HomeView(type:"bookmark")];
   }
 
   @override
@@ -70,7 +71,11 @@ class _AppViewState extends State<AppView> {
               width: double.infinity,
               child: SingleChildScrollView(
                 child: Column(
-                  children: [SizedBox(height: 30), screen,SizedBox(height: 50)],
+                  children: [
+                    SizedBox(height: 30),
+                    screen,
+                    SizedBox(height: 50),
+                  ],
                 ),
               ),
             ),
@@ -78,8 +83,10 @@ class _AppViewState extends State<AppView> {
         }).toList(),
       ),
       bottomNavigationBar: Container(
-        height: 60,
-        child: Row(
+        height: 65,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children:[ Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildNavItem(
@@ -87,7 +94,7 @@ class _AppViewState extends State<AppView> {
               0,
               assetsData.homeOutline,
               assetsData.homeFilled,
-              25,
+              24,
             ),
             _buildNavItem(
               context,
@@ -105,7 +112,9 @@ class _AppViewState extends State<AppView> {
             ),
           ],
         ),
-      ),
+
+        ],
+      )),
     );
   }
 
@@ -141,43 +150,87 @@ class _AppViewState extends State<AppView> {
   }
 
   Widget _getAppBar(int currentIndex) {
+    final PDFController pdfController = Get.put(PDFController());
     final List<String> titles = ["All files ", "Recent", "Bookmarks"];
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(width: 8),
-        if (currentIndex == 0)
+    if (isSearchEnabled && _currentIndex == 0) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 8),
           IconButton(
             onPressed: () {
-              showCupertinoModalBottomSheet(
-                context: context,
-                builder: (context) => MoreBottomSheetView(),
-              );
+              setState(() {
+                isSearchEnabled = !isSearchEnabled;
+                //clear input
+                searchController.text = "";
+                pdfController.filterHomePDF("");
+              });
             },
             icon: SvgPicture.asset(
-              assetsData.menu,
+              assetsData.back,
               width: 26,
               color: Theme.of(context).colorScheme.onBackground,
             ),
           ),
-        const SizedBox(width: 15),
-        Text(
-          titles[currentIndex],
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 22),
-        ),
-        const Spacer(),
-
-        if (currentIndex == 0)
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(
-              assetsData.search,
-              width: 24,
-              color: Theme.of(context).colorScheme.onBackground,
+          const SizedBox(width: 8),
+          Expanded(
+            child: customInput(
+              Theme.of(context),
+              searchController,
+              "Search for pdf...",
+              "",
+              context,
+              onTextChanged: (text) {
+                //filter list
+                pdfController.filterHomePDF(text);
+              },
             ),
           ),
-        const SizedBox(width: 14),
-      ],
-    );
+          const SizedBox(width: 14),
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: 8),
+          if (currentIndex == 0)
+            IconButton(
+              onPressed: () {
+                showCupertinoModalBottomSheet(
+                  context: context,
+                  builder: (context) => MoreBottomSheetView(),
+                );
+              },
+              icon: SvgPicture.asset(
+                assetsData.menu,
+                width: 26,
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+            ),
+          const SizedBox(width: 15),
+          Text(
+            titles[currentIndex],
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 22),
+          ),
+          const Spacer(),
+
+          if (currentIndex == 0)
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  isSearchEnabled = !isSearchEnabled;
+                });
+              },
+              icon: SvgPicture.asset(
+                assetsData.search,
+                width: 24,
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+            ),
+          const SizedBox(width: 14),
+        ],
+      );
+    }
   }
 }

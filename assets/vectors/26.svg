@@ -1,1 +1,34 @@
-<svg height="800" viewBox="0 0 128 128" width="800" xmlns="http://www.w3.org/2000/svg"><circle cx="64" cy="64" fill="#00adfe" r="60"/><circle cx="64" cy="64" fill="#356cb6" opacity=".3" r="48"/><path d="m64 13.88a32 32 0 0 1 32 32v64.79a0 0 0 0 1 0 0h-64a0 0 0 0 1 0 0v-64.79a32 32 0 0 1 32-32z" fill="#393c54"/><circle cx="89" cy="61" fill="#fbc0aa" r="7"/><path d="m64 124a59.67 59.67 0 0 0 34.69-11.06l-3.32-9.3a10 10 0 0 0 -9.37-6.64h-43.95a10 10 0 0 0 -9.42 6.64l-3.32 9.3a59.67 59.67 0 0 0 34.69 11.06z" fill="#f85565"/><path d="m73 98.25a9 9 0 0 1 -18 0c0-5 4-3 9-3s9-1.97 9 3z" fill="#fff"/><path d="m64 84.75v13.75" fill="none" stroke="#fbc0aa" stroke-linecap="round" stroke-linejoin="round" stroke-width="14"/><circle cx="39" cy="61" fill="#fbc0aa" r="7"/><path d="m64 91a25 25 0 0 1 -25-25v-16.48a25 25 0 1 1 50 0v16.48a25 25 0 0 1 -25 25z" fill="#ffd8c9"/><path d="m36.51 52.12v-4.72c0-14.95 11.71-27.61 26.66-28a27.51 27.51 0 0 1 28.32 27.42v-.24a2 2 0 0 1 -2 2h-9.37a1.82 1.82 0 0 1 -1.55-.87l-2.33-3.8a1.82 1.82 0 0 0 -3.24.27l-3.11 8.82a1.83 1.83 0 0 1 -1.69 1.14h-29.65a2 2 0 0 1 -2.04-2.02z" fill="#515570"/><path d="m44.22 38.85a21.67 21.67 0 0 1 19.13-13.51" style="fill:none;stroke-linecap:round;stroke:#fff;stroke-miterlimit:10;stroke-width:4;opacity:.1"/><circle cx="74.67" cy="59.28" fill="#515570" r="3"/><path d="m55 60h-6" fill="none" stroke="#515570" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/><path d="m63.35 63.75v4.5" fill="none" stroke="#fbc0aa" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/><path d="m69.15 78.94c0 2-2.3 3.16-5.15 3.16s-5.15-1.52-5.15-3.16c0-2.84 2.48-3.94 5.15-3.15 2.58-.87 5.15.31 5.15 3.15z" fill="#f85565" opacity=".5"/><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m58 77.87a16.83 16.83 0 0 0 12 0" stroke="#f85565"/><path d="m72.39 53h8.61" opacity=".2" stroke="#515570"/></g></svg>
+<svg height="800" viewBox="0 0 128 128" width="800" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="64" cy="64" fill="#00adfe" r="60" />
+    <circle cx="64" cy="64" fill="#356cb6" opacity=".3" r="48" />
+    <path
+        d="m64 13.88a32 32 0 0 1 32 32v64.79a0 0 0 0 1 0 0h-64a0 0 0 0 1 0 0v-64.79a32 32 0 0 1 32-32z"
+        fill="#393c54" />
+    <circle cx="89" cy="61" fill="#fbc0aa" r="7" />
+    <path
+        d="m64 124a59.67 59.67 0 0 0 34.69-11.06l-3.32-9.3a10 10 0 0 0 -9.37-6.64h-43.95a10 10 0 0 0 -9.42 6.64l-3.32 9.3a59.67 59.67 0 0 0 34.69 11.06z"
+        fill="#f85565" />
+    <path d="m73 98.25a9 9 0 0 1 -18 0c0-5 4-3 9-3s9-1.97 9 3z" fill="#fff" />
+    <path d="m64 84.75v13.75" fill="none" stroke="#fbc0aa" stroke-linecap="round"
+        stroke-linejoin="round" stroke-width="14" />
+    <circle cx="39" cy="61" fill="#fbc0aa" r="7" />
+    <path d="m64 91a25 25 0 0 1 -25-25v-16.48a25 25 0 1 1 50 0v16.48a25 25 0 0 1 -25 25z"
+        fill="#ffd8c9" />
+    <path
+        d="m36.51 52.12v-4.72c0-14.95 11.71-27.61 26.66-28a27.51 27.51 0 0 1 28.32 27.42v-.24a2 2 0 0 1 -2 2h-9.37a1.82 1.82 0 0 1 -1.55-.87l-2.33-3.8a1.82 1.82 0 0 0 -3.24.27l-3.11 8.82a1.83 1.83 0 0 1 -1.69 1.14h-29.65a2 2 0 0 1 -2.04-2.02z"
+        fill="#515570" />
+    <path style="fill:none;stroke-linecap:round;stroke:#fff;stroke-miterlimit:10;stroke-width:4;opacity:.1"
+        d="m44.22 38.85a21.67 21.67 0 0 1 19.13-13.51" />
+    <circle cx="74.67" cy="59.28" fill="#515570" r="3" />
+    <path d="m55 60h-6" fill="none" stroke="#515570" stroke-linecap="round" stroke-linejoin="round"
+        stroke-width="2" />
+    <path d="m63.35 63.75v4.5" fill="none" stroke="#fbc0aa" stroke-linecap="round"
+        stroke-linejoin="round" stroke-width="5" />
+    <path
+        d="m69.15 78.94c0 2-2.3 3.16-5.15 3.16s-5.15-1.52-5.15-3.16c0-2.84 2.48-3.94 5.15-3.15 2.58-.87 5.15.31 5.15 3.15z"
+        fill="#f85565" opacity=".5" />
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+        <path d="m58 77.87a16.83 16.83 0 0 0 12 0" stroke="#f85565" />
+        <path d="m72.39 53h8.61" opacity=".2" stroke="#515570" />
+    </g>
+</svg>

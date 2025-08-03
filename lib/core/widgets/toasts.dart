@@ -58,7 +58,11 @@ class Toast {
     );
   }
 
-  static void showError(String message, BuildContext context, {int autoCloseSeconds = 3}) {
+  static void showError(
+    String message,
+    BuildContext context, {
+    int autoCloseSeconds = 3,
+  }) {
     _showToast(
       message: message,
       context: context,
@@ -92,5 +96,4 @@ class Toast {
       type: ToastificationType.info,
     );
   }
-
 }

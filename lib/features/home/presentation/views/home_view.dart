@@ -1,36 +1,61 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-
-import '../../../../core/services/storage_service.dart';
+import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/widgets/basics.dart';
-import '../../../../main.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
-
+  const HomeView({super.key, required this.type});
+  final String type;
   @override
-  State<HomeView> createState() => _State();
+  State<HomeView> createState() => _HomeViewState();
 }
 
-class _State extends State<HomeView> {
+class _HomeViewState extends State<HomeView> {
+  late PDFController pdfController;
+
   @override
   void initState() {
     super.initState();
+    pdfController = Get.put(PDFController());
   }
 
   @override
   Widget build(BuildContext context) {
-    double last = 0;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-      child: booksGridView(
-        pdfFiles,
-        onTap: (item) {
-        },
-      ),
+      child: Obx(() {
+        //get list depending on section
+        List<String> pdfList = [];
+        if(widget.type=="home"){
+          pdfList = pdfController.homePDF.value;
+        }else if(widget.type=="recent"){
+          pdfList = pdfController.recentPDF.value;
+        }else if(widget.type=="bookmark"){
+          pdfList = pdfController.bookmarkPDF.value;
+        }
+        return (pdfList.isEmpty)
+            ? Center(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Center(
+                    child: Text(
+                      'No PDFs Available',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ),
+              )
+            : booksListView(
+                pdfList,
+                context: context,
+                onTap: (item) {
+                  // Handle item tap here
+                  print('Tapped on: $item');
+                },
+              );
+      }),
     );
   }
 }

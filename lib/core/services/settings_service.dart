@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsService {
-  static final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  static final Future<SharedPreferences> _prefs =
+      SharedPreferences.getInstance();
 
   static Future<void> saveIsGrid(bool value) async {
     (await _prefs).setBool('is_grid', value);

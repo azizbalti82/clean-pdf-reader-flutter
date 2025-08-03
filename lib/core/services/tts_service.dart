@@ -2,6 +2,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 
 class TTSService {
   static final TTSService _instance = TTSService._internal();
+
   factory TTSService() => _instance;
 
   late FlutterTts _flutterTts;
