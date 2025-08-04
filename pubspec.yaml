@@ -41,6 +41,9 @@ dependencies:
   pdf_thumbnail: ^0.1.6+1
   flutter_fullscreen: ^1.2.0
   font_awesome_flutter: ^10.8.0
+  share_plus: ^7.2.2
+  pdf: ^3.10.7
+  image: ^4.1.7
 
 dev_dependencies:
   flutter_test:

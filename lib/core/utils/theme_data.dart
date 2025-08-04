@@ -14,11 +14,11 @@ class AppTheme {
 
   static final darkTheme = ThemeData(
     colorScheme: ColorScheme.fromSeed(
-      seedColor: Color(0xFF2E424E),
+      seedColor: Color(0xFF2B5670),
       brightness: Brightness.dark,
     ),
     scaffoldBackgroundColor: Colors.black,
-    cardColor: Color(0xFF2E424E).withOpacity(0.1),
+    cardColor: Color(0xFF2B5670).withOpacity(0.1),
     appBarTheme: AppBarTheme(color: Colors.black),
     useMaterial3: true,
   );

@@ -5,11 +5,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pdf_reader/features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
-import '../../../../core/getx_scroll_manager.dart';
+import 'package:pdf_reader/main.dart';
 import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/utils/assets_data.dart';
 import '../../../../core/widgets/form.dart';
-import '../../../home/presentation/views/home_view.dart';
+import '../../../pdf listing/presentation/views/home_view.dart';
 
 class AppView extends StatefulWidget {
   const AppView({super.key});
@@ -21,7 +21,6 @@ class AppView extends StatefulWidget {
 class _AppViewState extends State<AppView> {
   int _currentIndex = 0;
   late final List<Widget> _screens;
-  final scrollManager = Get.find<ScrollManager>();
   bool isSearchEnabled = false;
   TextEditingController searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -29,7 +28,11 @@ class _AppViewState extends State<AppView> {
   @override
   void initState() {
     super.initState();
-    _screens = const [HomeView(type:"home"), HomeView(type:"recent"), HomeView(type:"bookmark")];
+    _screens = const [
+      HomeView(type: "pdf listing"),
+      HomeView(type: "recent"),
+      HomeView(type: "bookmark"),
+    ];
   }
 
   @override
@@ -46,25 +49,6 @@ class _AppViewState extends State<AppView> {
           titleSpacing: 0,
         ),
       ),
-      floatingActionButton: Obx(
-        () => AnimatedSwitcher(
-          duration: Duration(milliseconds: 150),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            // Use ScaleTransition to scale the FAB in/out
-            return ScaleTransition(scale: animation, child: child);
-          },
-          child: (_currentIndex == 0 && scrollManager.isScrolled.value)
-              ? FloatingActionButton(
-                  key: ValueKey('fab_visible'),
-                  onPressed: scrollManager.scrollToTop,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  child: Icon(Icons.arrow_upward_sharp),
-                  shape: CircleBorder(),
-                )
-              : SizedBox.shrink(key: ValueKey('fab_hidden')),
-        ),
-      ),
       body: IndexedStack(
         index: _currentIndex,
         children: _screens.map((screen) {
@@ -72,13 +56,22 @@ class _AppViewState extends State<AppView> {
             alignment: Alignment.topCenter,
             child: SizedBox(
               width: double.infinity,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(height: 30),
-                    screen,
-                    SizedBox(height: 50),
-                  ],
+              child: RefreshIndicator(
+                displacement: 5,
+                backgroundColor: Theme.of(context).colorScheme.background,
+                color: Theme.of(context).colorScheme.primary,
+                elevation: 0,
+                onRefresh: () async {
+                  loadPDFs();
+                },
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 30),
+                      screen,
+                      SizedBox(height: 50),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -89,35 +82,36 @@ class _AppViewState extends State<AppView> {
         height: 65,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-          children:[ Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavItem(
-              context,
-              0,
-              assetsData.homeOutline,
-              assetsData.homeFilled,
-              24,
-            ),
-            _buildNavItem(
-              context,
-              1,
-              assetsData.recentOutline,
-              assetsData.recentFilled,
-              27,
-            ),
-            _buildNavItem(
-              context,
-              2,
-              assetsData.bookmarkOutline,
-              assetsData.bookmarkFilled,
-              24,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildNavItem(
+                  context,
+                  0,
+                  assetsData.homeOutline,
+                  assetsData.homeFilled,
+                  24,
+                ),
+                _buildNavItem(
+                  context,
+                  1,
+                  assetsData.recentOutline,
+                  assetsData.recentFilled,
+                  27,
+                ),
+                _buildNavItem(
+                  context,
+                  2,
+                  assetsData.bookmarkOutline,
+                  assetsData.bookmarkFilled,
+                  24,
+                ),
+              ],
             ),
           ],
         ),
-
-        ],
-      )),
+      ),
     );
   }
 
@@ -175,13 +169,12 @@ class _AppViewState extends State<AppView> {
               color: Theme.of(context).colorScheme.onBackground,
             ),
           ),
-          const SizedBox(width: 8),
           Expanded(
             child: customInput(
               Theme.of(context),
               searchController,
               _focusNode,
-              "Search for pdf...",
+              "Search for pdf",
               "",
               context,
               onTextChanged: (text) {
@@ -190,7 +183,7 @@ class _AppViewState extends State<AppView> {
               },
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 20),
         ],
       );
     } else {
@@ -202,6 +195,7 @@ class _AppViewState extends State<AppView> {
             IconButton(
               onPressed: () {
                 showCupertinoModalBottomSheet(
+                  topRadius: Radius.circular(25),
                   context: context,
                   builder: (context) => MoreBottomSheetView(),
                 );

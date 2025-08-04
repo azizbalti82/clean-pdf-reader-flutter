@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fullscreen/flutter_fullscreen.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
-import 'core/getx_scroll_manager.dart';
 import 'core/provider/lists_provider.dart';
 import 'core/provider/settings_provider.dart';
 import 'core/services/settings_service.dart';
@@ -36,6 +34,8 @@ void loadPDFs() async {
     pdfController.updateHomePDF(pdfFiles);
     pdfController.updateRecentPDF([]);
     pdfController.updateBookmarkPDF([]);
+
+    pdfController.sort(settingsProvider.sortBy.value);
   } catch (e) {
     print("Error: $e");
   }
@@ -53,7 +53,6 @@ Future<void> main() async {
   requestPermissions().catchError((e) {
     print("Permission error: $e");
   });
-  Get.put(ScrollManager());
   runApp(const App());
 }
 

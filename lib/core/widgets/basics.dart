@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -10,6 +12,7 @@ import '../../features/application/presentation/views/widgets/more_bottom_sheet_
 import '../../features/pdf preview/presentation/views/pdf_preview_view.dart';
 import '../../features/pdf preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 import '../provider/settings_provider.dart';
+import '../utils/tools.dart';
 
 Widget simpleAppBar(BuildContext context, {required String text}) {
   final colorScheme = Theme.of(context).colorScheme;
@@ -115,14 +118,14 @@ Widget pdfItem({
   VoidCallback? onTap,
 }) {
   return GestureDetector(
-    onTap: () async{
-      await Get.to(PdfPreviewView(pdfPath: filePath,));
+    onTap: () async {
+      await Get.to(PdfPreviewView(pdfPath: filePath));
     },
-    onLongPress: (){
+    onLongPress: () {
       showCupertinoModalBottomSheet(
         topRadius: Radius.circular(25),
         context: context,
-        builder: (context) => PdfOptionsBottomSheetView(path:filePath),
+        builder: (context) => PdfOptionsBottomSheetView(path: filePath),
       );
     },
     child: Container(
@@ -142,36 +145,62 @@ Widget pdfItem({
       ),
       child: Column(
         children: [
-          // PDF preview area with fixed aspect ratio
+          // PDF preview area with thumbnail
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
               ),
-              child: Stack(
-                children: [
-                  Container(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.background.withOpacity(0.9),
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: Center(
+              child: Container(
+                color: Theme.of(context).colorScheme.background.withOpacity(0.9),
+                width: double.infinity,
+                height: double.infinity,
+                child: FutureBuilder<Uint8List?>(
+                  future: getPdfThumbnail(filePath),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: Icon(
+                          Icons.picture_as_pdf,
+                          size: 40,
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasData && snapshot.data != null) {
+                      return Image.memory(
+                        snapshot.data!,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                            child: Icon(
+                              Icons.picture_as_pdf,
+                              size: 40,
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                            ),
+                          );
+                        },
+                      );
+                    }
+
+                    // Fallback icon
+                    return Center(
                       child: Icon(
                         Icons.picture_as_pdf,
                         size: 40,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
                       ),
-                    ),
-                  ),
-                ],
+                    );
+                  },
+                ),
               ),
             ),
           ),
-          // File info section with dynamic text sizing
+          // File info section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 16),
             child: Text(
@@ -195,7 +224,8 @@ Widget pdfItemInline({
   required String filePath,
   required BuildContext context,
   VoidCallback? onTap,
-}) {
+})
+{
   return GestureDetector(
     onTap: () async{
       await Get.to(PdfPreviewView(pdfPath: filePath,));

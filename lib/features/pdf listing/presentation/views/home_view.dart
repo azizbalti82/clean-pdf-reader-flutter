@@ -30,7 +30,7 @@ class _HomeViewState extends State<HomeView> {
       child: Obx(() {
         //get list depending on section
         List<String> pdfList = [];
-        if (widget.type == "home") {
+        if (widget.type == "pdf listing") {
           pdfList = pdfController.homePDF.value;
         } else if (widget.type == "recent") {
           pdfList = pdfController.recentPDF.value;

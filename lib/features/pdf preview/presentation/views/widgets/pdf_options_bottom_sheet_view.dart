@@ -3,12 +3,17 @@ import 'dart:io';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_down_button/pull_down_button.dart';
-
+import 'package:share_plus/share_plus.dart';
 import '../../../../../core/utils/constants.dart';
 import '../../../../../core/widgets/form.dart';
 import 'package:path/path.dart' as path_ob;
+
+import '../../../../../core/widgets/toasts.dart';
+import '../../../../../main.dart';
 
 
 class PdfOptionsBottomSheetView extends StatelessWidget {
@@ -78,9 +83,12 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
               iconColor:Theme.of(
                 context,
               ).colorScheme.onSurface.withOpacity(0.7) ,
-              onTap: () {
-                // Handle share action
-                print("Share tapped");
+              onTap: () async{
+                await sharePdfFile(
+                path,
+                subject: "Share PDF",
+                text: path_ob.basenameWithoutExtension(path),
+                );
               },
             ),
             SizedBox(height: 10),
@@ -90,9 +98,13 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
               iconColor:Theme.of(
                 context,
               ).colorScheme.onSurface.withOpacity(0.7) ,
-              onTap: () {
-                // Handle share action
-                print("Share tapped");
+              onTap: () async{
+                bool result = await renameFile(path,context);
+                if(result){
+                  Toast.showSuccess("PDF renamed successfully!", context);
+                }else{
+                  Toast.showError("Error while renaming PDF", context);
+                }
               },
             ),
             SizedBox(height: 10),
@@ -106,9 +118,13 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
                 context,
               ).colorScheme.error.withOpacity(0.7) ,
               spacing: 32,
-              onTap: () {
-                // Handle share action
-                print("delete tapped");
+              onTap: () async{
+                bool result = await deleteFile(path,context);
+                if(result){
+                  Toast.showSuccess("PDF deleted successfully!", context);
+                }else{
+                  Toast.showError("Error while deleting PDF", context);
+                }
               },
             ),
 
@@ -117,6 +133,150 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<bool> sharePdfFile(
+      String filePath, {
+        String? subject,
+        String? text,
+      }) async
+  {
+    try {
+      // Check if file exists
+      final file = File(filePath);
+      if (!await file.exists()) {
+        print('Error: PDF file not found at path: $filePath');
+        return false;
+      }
+
+      final xFile = XFile(filePath);
+
+      // Share the file
+      final result = await Share.shareXFiles(
+        [xFile],
+        subject: subject ?? 'Sharing PDF Document',
+        text: text ?? 'Please find the attached PDF document.',
+      );
+
+      if (result.status == ShareResultStatus.success) {
+        print('PDF shared successfully');
+        return true;
+      } else {
+        print('Sharing failed or was dismissed');
+        return false;
+      }
+    } catch (e) {
+      print('Error sharing PDF: $e');
+      return false;
+    }
+  }
+  Future<bool> deleteFile(
+      String filePath,
+      BuildContext context,
+      ) async
+  {
+    try {
+      final file = File(filePath);
+
+      // Check if file exists
+      if (!await file.exists()) {
+        print('Warning: File does not exist at path: $filePath');
+        return false;
+      }
+
+      // Get file info for confirmation dialog
+      final fileName = path_ob.basename(filePath);
+
+      // Show confirmation dialog
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Delete File'),
+          content: Text('Are you sure you want to delete this file?\nThis action cannot be undone.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('Cancel')),
+            TextButton(
+              onPressed: () async{
+                Navigator.of(context).pop(true);
+                Navigator.of(context).pop(true);
+                //update list with provider
+                loadPDFs();
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text('Delete'),
+            ),
+          ],
+        ),
+      );
+
+
+      // If user cancelled or dialog was dismissed
+      if (confirmed != true) {
+        print('Deletion cancelled by user');
+        return false;
+      }
+
+      // Delete the file
+      await file.delete();
+
+      // Verify deletion
+      final deletionSuccessful = !await file.exists();
+
+      if (deletionSuccessful) {
+        print('File deleted successfully: $fileName');
+      } else {
+        print('Error: File still exists after deletion attempt');
+      }
+
+      return deletionSuccessful;
+    } catch (e) {
+      print('Error deleting file: $e');
+      return false;
+    }
+  }
+  Future<bool> renameFile(String filePath, BuildContext context) async {
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) return false;
+
+      final currentName = path_ob.basenameWithoutExtension(filePath);
+      final extension = path_ob.extension(filePath);
+      final directory = path_ob.dirname(filePath);
+
+      final controller = TextEditingController(text: currentName);
+
+      final newName = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Rename'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(suffixText: extension),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              child: Text('Rename'),
+            ),
+          ],
+        ),
+      );
+
+      if (newName == null || newName.isEmpty || newName == currentName) return false;
+
+      final newPath = path_ob.join(directory, '$newName$extension');
+      if (await File(newPath).exists()) return false;
+
+      await file.rename(newPath);
+      Navigator.pop(context, true);
+      loadPDFs();
+      return true;
+
+    } catch (e) {
+      return false;
+    }
   }
 
   Widget buildClickableRow({
@@ -149,7 +309,6 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
       ),
     );
   }
-
   Widget buildPdfInfoColumn(String filePath) {
     return FutureBuilder<Map<String, String>>(
       future: _getPdfInfo(filePath),
@@ -199,7 +358,6 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
       },
     );
   }
-
   Future<Map<String, String>> _getPdfInfo(String filePath) async {
     try {
       final file = File(filePath);

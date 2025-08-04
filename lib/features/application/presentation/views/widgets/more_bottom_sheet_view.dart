@@ -1,7 +1,6 @@
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 import '../../../../../core/provider/lists_provider.dart';
@@ -9,248 +8,212 @@ import '../../../../../core/provider/settings_provider.dart';
 import '../../../../../core/services/settings_service.dart';
 import '../../../../../core/utils/constants.dart';
 import '../../../../../core/widgets/form.dart';
+import '../../../../../main.dart';
 
 class MoreBottomSheetView extends StatelessWidget {
   MoreBottomSheetView({super.key});
-  SettingsProvider settingsProvider= Get.put(SettingsProvider());
-  PDFController pdfController = Get.put(PDFController());
 
+  final SettingsProvider settingsProvider = Get.put(SettingsProvider());
+  final PDFController pdfController = Get.put(PDFController());
 
+  static const _sortOptions = [
+    ('Name', 'name'),
+    ('Date Added (new first)', 'date_new'),
+    ('Date Added (old first)', 'date_old'),
+  ];
+
+  static const _gridOptions = [
+    ('Grid view', true),
+    ('List view', false),
+  ];
+
+  static const _columnOptions = [(2, '2 Columns'), (3, '3 Columns'), (4, '4 Columns')];
 
   @override
   Widget build(BuildContext context) {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          const SizedBox(height: 4),
+          _buildHandle(colorScheme),
+          const SizedBox(height: 20),
+          _buildSettingsSection(context),
+          _buildContactSection(),
+          _buildAboutSection(context, isLandscape),
           const SizedBox(height: 10),
-          // settings
-          _buildSection(
-            context,
-            title: "Settings",
-            icon: Icons.settings,
-            children: [
-              Align(
-                alignment: AlignmentDirectional.topStart,
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.start,
-                  children: [
-                    PullDownButton(
-                      itemBuilder: (context) => [
-                        PullDownMenuItem(
-                          title: 'Name',
-                          onTap: () {
-                            SettingsService.saveSortType("name");
-                            settingsProvider.updateSortBy("name");
-                            pdfController.sort("name");
-                          },
-                        ),
-                        PullDownMenuItem(
-                          title: 'Date Added (new first)',
-                          onTap: () {
-                            SettingsService.saveSortType("date_new");
-                            settingsProvider.updateSortBy("date_new");
-                            pdfController.sort("date_new");
-
-                          },
-                        ),
-                        PullDownMenuItem(
-                          title: 'Date Added (old first)',
-                          onTap: () {
-                            SettingsService.saveSortType("date_old");
-                            settingsProvider.updateSortBy("date_old");
-                            pdfController.sort("date_old");
-
-                          },
-                        ),
-                      ],
-                      buttonBuilder: (context, showMenu) => CustomButtonOutline(
-                        text: 'Sort By',
-                        icon: "sort",
-                        isFullRow: false,
-                        isLoading: false,
-                        onPressed: showMenu,
-                      ),
-                    ),
-                    PullDownButton(
-                      itemBuilder: (context) => [
-                        PullDownMenuItem(
-                          title: 'Grid view',
-                          onTap: () {
-                            SettingsService.saveIsGrid(true);
-                            settingsProvider.updateIsGrid(true);
-                          },
-                        ),
-                        PullDownMenuItem(
-                          title: 'List view',
-                          onTap: () {
-                            SettingsService.saveIsGrid(false);
-                            settingsProvider.updateIsGrid(false);
-                          },
-                        ),
-                      ],
-                      buttonBuilder: (context, showMenu) => CustomButtonOutline(
-                        text: 'Grid view',
-                        icon: "grid",
-                        isLoading: false,
-                        isFullRow: false,
-                        onPressed: showMenu,
-                      ),
-                    ),
-                    PullDownButton(
-                      itemBuilder: (context) => [
-                        PullDownMenuItem(
-                          title: '2 Columns',
-                          onTap: () {
-                            SettingsService.saveGridCount(2);
-                            settingsProvider.updateColCount(2);
-                          },
-                        ),
-                        PullDownMenuItem(
-                          title: '3 Columns',
-                          onTap: () {
-                            SettingsService.saveGridCount(3);
-                            settingsProvider.updateColCount(3);
-                          },
-                        ),
-                        PullDownMenuItem(
-                          title: '4 Columns',
-                          onTap: () {
-                            SettingsService.saveGridCount(4);
-                            settingsProvider.updateColCount(4);
-                          },
-                        ),
-                      ],
-                      buttonBuilder: (context, showMenu) => CustomButtonOutline(
-                        text: 'Column count',
-                        icon: "grid_count",
-                        isLoading: false,
-                        isFullRow: false,
-                        onPressed: showMenu,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          // Contact Section
-          _buildSection(
-            context,
-            title: "Contact Us",
-            icon: Icons.email,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomButtonOutline(
-                      text: 'Email',
-                      icon: "email",
-                      isLoading: false,
-                      onPressed: () async {
-                        String email = 'baltcode.app@gmail.com';
-                        String subject = 'App watchy contact';
-                        String body = '';
-
-                        String mailtoUrl =
-                            'mailto:$email?subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}';
-
-                        await EasyLauncher.url(url: mailtoUrl);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomButtonOutline(
-                      text: 'Github',
-                      icon: 'github',
-                      isLoading: false,
-                      onPressed: () async {
-                        await EasyLauncher.url(url: "");
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: CustomButtonOutline(
-                  text: 'Developer Website',
-                  icon: 'public',
-                  isLoading: false,
-                  onPressed: () async {
-                    await EasyLauncher.url(
-                      url: "https://azizbalti.netlify.app",
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-
-          // About Section
-          _buildSection(
-            context,
-            title: "About",
-            icon: Icons.info,
-            children: aboutButtons(context),
-            isVertical: !isLandscape,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${Constants.packageInfo?.version ?? ''}b${Constants.packageInfo?.buildNumber ?? ''}',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
+          _buildVersionText(context),
           const SizedBox(height: 10),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        CircleAvatar(
-          radius: 50,
-          backgroundColor: Colors.white,
-          child: Image.asset(
-            "assets/logo/logo.png",
-            width: 70,
-            fit: BoxFit.cover,
+  Widget _buildHandle(ColorScheme colorScheme) => Container(
+    width: 30,
+    height: 5,
+    decoration: BoxDecoration(
+      color: colorScheme.primary.withOpacity(0.2),
+      borderRadius: BorderRadius.circular(20),
+    ),
+  );
+
+  Widget _buildSettingsSection(BuildContext context) => _buildSection(
+    context,
+    title: "Settings",
+    icon: Icons.settings,
+    children: [
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          _buildSortButton(),
+          _buildViewButton(),
+          _buildColumnButton(),
+          CustomButtonOutline(
+            text: "Refresh",
+            icon: "refresh",
+            isLoading: false,
+            isFullRow: false,
+            onPressed: loadPDFs,
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      ),
+    ],
+  );
+
+  Widget _buildSortButton() => PullDownButton(
+    itemBuilder: (_) => _sortOptions.map((option) => PullDownMenuItem(
+      title: option.$1,
+      onTap: () => _updateSort(option.$2),
+    )).toList(),
+    buttonBuilder: (_, showMenu) => CustomButtonOutline(
+      text: _getSortName(settingsProvider.sortBy.value),
+      icon: "sort",
+      isFullRow: false,
+      isLoading: false,
+      onPressed: showMenu,
+    ),
+  );
+
+  Widget _buildViewButton() => PullDownButton(
+    itemBuilder: (_) => _gridOptions.map((option) => PullDownMenuItem(
+      title: option.$1,
+      onTap: () => _updateView(option.$2),
+    )).toList(),
+    buttonBuilder: (_, showMenu) => CustomButtonOutline(
+      text: settingsProvider.isGrid.value ? 'Grid view' : "List view",
+      icon: "grid",
+      isLoading: false,
+      isFullRow: false,
+      onPressed: showMenu,
+    ),
+  );
+
+  Widget _buildColumnButton() => PullDownButton(
+    itemBuilder: (_) => _columnOptions.map((option) => PullDownMenuItem(
+      title: option.$2,
+      onTap: () => _updateColumns(option.$1),
+    )).toList(),
+    buttonBuilder: (_, showMenu) => CustomButtonOutline(
+      text: '${settingsProvider.colCount.value} Columns',
+      icon: "grid_count",
+      isLoading: false,
+      isFullRow: false,
+      onPressed: showMenu,
+    ),
+  );
+
+  Widget _buildContactSection() => _buildSection(
+    null,
+    title: "Contact Us",
+    icon: Icons.email,
+    children: [
+      Row(
+        children: [
+          Expanded(child: _buildEmailButton()),
+          const SizedBox(width: 10),
+          Expanded(child: _buildGithubButton()),
+        ],
+      ),
+      _buildWebsiteButton(),
+    ],
+  );
+
+  Widget _buildAboutSection(BuildContext context, bool isLandscape) => _buildSection(
+    context,
+    title: "About",
+    icon: Icons.info,
+    children: [
+      _buildRateButton(),
+      _buildPrivacyButton(),
+    ],
+    isVertical: !isLandscape,
+  );
+
+  Widget _buildEmailButton() => CustomButtonOutline(
+    text: 'Email',
+    icon: "email",
+    isLoading: false,
+    onPressed: () => EasyLauncher.url(
+      url: 'mailto:baltcode.app@gmail.com?subject=${Uri.encodeComponent('App watchy contact')}',
+    ),
+  );
+
+  Widget _buildGithubButton() => CustomButtonOutline(
+    text: 'Github',
+    icon: 'github',
+    isLoading: false,
+    onPressed: () => EasyLauncher.url(url: ""),
+  );
+
+  Widget _buildWebsiteButton() => CustomButtonOutline(
+    text: 'Developer Website',
+    icon: 'public',
+    isLoading: false,
+    onPressed: () => EasyLauncher.url(url: "https://azizbalti.netlify.app"),
+  );
+
+  Widget _buildRateButton() => CustomButtonOutline(
+    text: "Rate us",
+    isLoading: false,
+    onPressed: () => EasyLauncher.url(
+      url: "https://play.google.com/store/apps/details?id=com.baltcode.watchy",
+    ),
+  );
+
+  Widget _buildPrivacyButton() => CustomButtonOutline(
+    text: "Privacy policy",
+    isLoading: false,
+    onPressed: () => EasyLauncher.url(
+      url: "https://azizbalti.netlify.app/projects/lingua/it/privacy.html",
+    ),
+  );
+
+  Widget _buildVersionText(BuildContext context) => Text(
+    '${Constants.packageInfo?.version ?? ''}b${Constants.packageInfo?.buildNumber ?? ''}',
+    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    ),
+  );
 
   Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    String? content,
-    List<Widget>? children,
-    bool isVertical = true,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+      BuildContext? context, {
+        required String title,
+        required IconData icon,
+        String? content,
+        List<Widget>? children,
+        bool isVertical = true,
+      }) {
+    final colorScheme = Theme.of(context ?? Get.context!).colorScheme;
+    final textTheme = Theme.of(context ?? Get.context!).textTheme;
 
-    final items = <Widget>[
-      if (content != null) ...[
-        Text(
-          content,
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
+    final items = [
+      if (content != null)
+        Text(content, style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
       if (children != null) ...children,
     ];
 
@@ -279,60 +242,46 @@ class MoreBottomSheetView extends StatelessWidget {
             const SizedBox(height: 20),
             isVertical
                 ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: items
-                        .map(
-                          (item) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: item,
-                          ),
-                        )
-                        .toList(),
-                  )
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: items.map((item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: item,
+              )).toList(),
+            )
                 : Row(
-                    children: items
-                        .map(
-                          (item) => Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              child: item,
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
+              children: items.map((item) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: item,
+                ),
+              )).toList(),
+            ),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> aboutButtons(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return [
-      CustomButtonOutline(
-        text: "Rate us",
-        isLoading: false,
-        onPressed: () async {
-          await EasyLauncher.url(
-            url:
-                "https://play.google.com/store/apps/details?id=com.baltcode.watchy",
-          );
-        },
-      ),
-      CustomButtonOutline(
-        text: "Privacy policy",
-        isLoading: false,
-        onPressed: () async {
-          await EasyLauncher.url(
-            url:
-                "https://azizbalti.netlify.app/projects/lingua/it/privacy.html",
-          );
-        },
-      ),
-    ];
+  void _updateSort(String sortType) {
+    SettingsService.saveSortType(sortType);
+    settingsProvider.updateSortBy(sortType);
+    pdfController.sort(sortType);
   }
+
+  void _updateView(bool isGrid) {
+    SettingsService.saveIsGrid(isGrid);
+    settingsProvider.updateIsGrid(isGrid);
+  }
+
+  void _updateColumns(int count) {
+    SettingsService.saveGridCount(count);
+    settingsProvider.updateColCount(count);
+  }
+
+  String _getSortName(String value) => switch (value) {
+    'name' => 'Name',
+    'date_new' => 'Date Added (new first)',
+    'date_old' => 'Date Added (old first)',
+    _ => '',
+  };
 }
