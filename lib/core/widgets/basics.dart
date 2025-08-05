@@ -7,6 +7,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path;
 import 'package:pdf_reader/main.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
 import '../../features/pdf listing/models/pdf.dart';
@@ -127,13 +128,13 @@ Widget pdfItem({
 }) {
   return GestureDetector(
     onTap: () async {
-      await Get.to(PdfPreviewView(pdfPath: filePath));
+      navigate(context,PdfPreviewView(pdfPath: filePath));
     },
     onLongPress: () {
       showCupertinoModalBottomSheet(
         topRadius: Radius.circular(25),
         context: context,
-        builder: (context) => PdfOptionsBottomSheetView(path: filePath,fromPreview: false,),
+        builder: (context) => PdfOptionsBottomSheetView(path: filePath, fromPreview: false),
       );
     },
     child: Container(
@@ -153,7 +154,7 @@ Widget pdfItem({
       ),
       child: Column(
         children: [
-          // PDF preview area with thumbnail
+          // PDF preview area with cached thumbnail
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
@@ -165,18 +166,9 @@ Widget pdfItem({
                 width: double.infinity,
                 height: double.infinity,
                 child: FutureBuilder<Uint8List?>(
-                  future: getPdfThumbnail(filePath),
+                  future: getPdfThumbnailCached(filePath), // Use the cached version here
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: Icon(
-                          Icons.picture_as_pdf,
-                          size: 40,
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
-                        ),
-                      );
-                    }
-
+                    // If data is available, display the image
                     if (snapshot.hasData && snapshot.data != null) {
                       return Image.memory(
                         snapshot.data!,
@@ -195,16 +187,19 @@ Widget pdfItem({
                       );
                     }
 
-                    // Fallback icon
-                    return Center(
-                      child: Icon(
-                        Icons.picture_as_pdf,
-                        size: 40,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                    // If the data is loading, show the shimmer animation
+                    return Shimmer.fromColors(
+                      baseColor: Theme.of(context).cardColor,
+                      highlightColor: Theme.of(context).colorScheme.surface.withOpacity(0.15),
+                      enabled: snapshot.connectionState == ConnectionState.waiting, // Only show shimmer when loading
+                      child: Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Theme.of(context).colorScheme.background, // Placeholder color
                       ),
                     );
                   },
-                ),
+                )
               ),
             ),
           ),
@@ -225,16 +220,16 @@ Widget pdfItem({
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                 ),
-                if(isRecent)
+                if (isRecent)
                   Container(
-                    padding: EdgeInsets.symmetric(vertical: 3,horizontal: 7),
+                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 7),
                     margin: EdgeInsets.symmetric(vertical: 2),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      getTimeSinceLastOpen(path:filePath),
+                      getTimeSinceLastOpen(path: filePath),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w400,
                         color: Theme.of(context).colorScheme.onSurface,
@@ -242,7 +237,7 @@ Widget pdfItem({
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  )
+                  ),
               ],
             ),
           ),
@@ -251,6 +246,7 @@ Widget pdfItem({
     ),
   );
 }
+
 
 Widget pdfItemInline({
   required String filePath,
@@ -261,8 +257,8 @@ Widget pdfItemInline({
 {
   return GestureDetector(
     onTap: () async{
-      await Get.to(PdfPreviewView(pdfPath: filePath,));
-    },
+      navigate(context,PdfPreviewView(pdfPath: filePath));
+      },
     onLongPress: (){
       showCupertinoModalBottomSheet(
         topRadius: Radius.circular(25),

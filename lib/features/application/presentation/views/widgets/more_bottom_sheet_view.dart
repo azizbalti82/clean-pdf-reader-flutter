@@ -44,6 +44,7 @@ class MoreBottomSheetView extends StatelessWidget {
           _buildSettingsSection(context),
           _buildContactSection(),
           _buildVersionText(context),
+
           const SizedBox(height: 10),
         ],
       ),
@@ -180,7 +181,7 @@ class MoreBottomSheetView extends StatelessWidget {
     icon: "privacy",
     isLoading: false,
     onPressed: () => EasyLauncher.url(
-      url: "https://azizbalti.netlify.app/projects/lingua/it/privacy.html",
+      url: "https://azizbalti.netlify.app/projects/mypdf/privacy.html",
     ),
   );
 

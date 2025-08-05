@@ -107,6 +107,8 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                 selectableItem("Default",!settingsProvider.isDark.value && !settingsProvider.isYellow.value,context,(){
                   SettingsService.saveIsDark(false);
                   settingsProvider.updateIsDark(false);
+                  SettingsService.saveIsYellow(false);
+                  settingsProvider.updateIsYellow(false);
                 }),
                 SizedBox(width: 12,),
                 selectableItem("Dark",settingsProvider.isDark.value,context,(){
@@ -145,7 +147,7 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               border: isSelected ? Border.all(color: accent.withOpacity(0.8)):null
           ),
-          child: Text(name,style: Theme.of(context).textTheme.titleMedium?.copyWith(color: isSelected ? accent:Theme.of(context).colorScheme.onBackground),
+          child: Text(name,style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: isSelected ? accent:Theme.of(context).colorScheme.onBackground),
           )),
     );
   }

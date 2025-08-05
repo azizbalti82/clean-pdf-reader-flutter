@@ -1,26 +1,29 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_fullscreen/flutter_fullscreen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pdf_reader/features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
 import 'package:pdf_reader/main.dart';
 import '../../../../core/provider/lists_provider.dart';
+import '../../../../core/services/settings_service.dart';
 import '../../../../core/utils/assets_data.dart';
 import '../../../../core/widgets/form.dart';
 import '../../../pdf listing/presentation/views/home_view.dart';
 import '../../../pdf preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 
 class AppView extends StatefulWidget {
-  const AppView({super.key});
-
+  const AppView({super.key, required this.currentIndex});
+  final int currentIndex;
   @override
   State<AppView> createState() => _AppViewState();
 }
 
 class _AppViewState extends State<AppView> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   late final List<Widget> _screens;
   bool isSearchEnabled = false;
   TextEditingController searchController = TextEditingController();
@@ -29,6 +32,7 @@ class _AppViewState extends State<AppView> {
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.currentIndex;
     _screens = const [
       HomeView(type: "pdf listing"),
       HomeView(type: "recent"),
@@ -38,8 +42,7 @@ class _AppViewState extends State<AppView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    FullScreen.setFullScreen(false);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(40),
@@ -128,7 +131,11 @@ class _AppViewState extends State<AppView> {
 
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _currentIndex = index),
+        onTap: () {
+          setState(() => _currentIndex = index);
+          //save last opened section
+          SettingsService.saveLastSection(_currentIndex);
+        },
         child: Container(
           width: 80,
           height: 50,

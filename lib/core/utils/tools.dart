@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -29,6 +31,9 @@ Future<Uint8List?> getPdfThumbnail(String pdfFilePath) async {
 }
 Future<Uint8List?> getPdfThumbnailCached(String pdfFilePath) async {
   try {
+
+    Future.delayed(Duration(seconds: 3));
+
     // Create cache file path
     final cacheDir = await getTemporaryDirectory();
     final fileName = path.basenameWithoutExtension(pdfFilePath);
@@ -51,5 +56,18 @@ Future<Uint8List?> getPdfThumbnailCached(String pdfFilePath) async {
   } catch (e) {
     print('Error with cached PDF thumbnail: $e');
     return await getPdfThumbnail(pdfFilePath);
+  }
+}
+navigate(BuildContext c,Widget screen,{bool? isReplace}){
+  if(isReplace!=null && isReplace){
+    Navigator.pushReplacement(
+        c,
+        MaterialPageRoute(builder: (context) => screen)
+    );
+  }else{
+    Navigator.push(
+        c,
+        MaterialPageRoute(builder: (context) => screen)
+    );
   }
 }

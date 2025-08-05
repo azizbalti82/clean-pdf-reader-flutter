@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   screen_retriever_linux
-  simple_animation_progress_bar
   url_launcher_linux
   window_manager
 )

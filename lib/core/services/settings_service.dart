@@ -4,6 +4,13 @@ import 'package:get/get.dart';
 class SettingsService {
   static final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
+  static Future<void> saveLastSection(int value) async {
+    (await _prefs).setInt('last_section', value);
+  }
+
+  static Future<int> getLastSection() async {
+    return (await _prefs).getInt('last_section') ?? 0;
+  }
   // Save and get isGrid
   static Future<void> saveIsGrid(bool value) async {
     (await _prefs).setBool('is_grid', value);

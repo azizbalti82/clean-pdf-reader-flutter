@@ -70,11 +70,14 @@ Future<void> main() async {
   requestPermissions().catchError((e) {
     print("Permission error: $e");
   });
-  runApp(const App());
+
+  int currentIndex = await SettingsService.getLastSection();
+  runApp(App(currentIndex:currentIndex));
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({super.key, required this.currentIndex});
+  final int currentIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -86,8 +89,7 @@ class App extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       // use the dark theme
       themeMode: ThemeMode.system,
-
-      home: const SystemUiStyleWrapper(child: AppView()),
+      home: SystemUiStyleWrapper(child: AppView(currentIndex: currentIndex,)),
     );
   }
 }

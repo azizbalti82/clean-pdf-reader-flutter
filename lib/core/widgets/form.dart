@@ -26,6 +26,38 @@ class CustomButtonOutline extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final outlineColor = borderColor ?? colorScheme.primary;
 
+    // Build the button child, which varies based on the loading state and icon presence
+    final buttonChild = Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (icon != null)
+          SvgPicture.asset(
+            "assets/icons/$icon.svg",
+            width: 22,
+            color: outlineColor,
+          ),
+        if (isLoading)
+          const SizedBox(width: 8),
+        if (isLoading)
+          SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: outlineColor,
+            ),
+          ),
+        if (!isLoading) const SizedBox(width: 8), // Space when not loading
+        Text(
+          text,
+          style: TextStyle(fontSize: size ?? 16, color: outlineColor),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+
+    // Apply size constraints if it's a full-row button
     final button = OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
@@ -35,39 +67,14 @@ class CustomButtonOutline extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         backgroundColor: outlineColor.withOpacity(0.07),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (icon != null)
-            SvgPicture.asset(
-              "assets/icons/$icon.svg",
-              width: 22,
-              color: outlineColor,
-            ),
-          if (isLoading) const SizedBox(width: 8),
-          if (isLoading)
-            SizedBox(
-              width: 12,
-              height: 12,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: outlineColor,
-              ),
-            ),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(fontSize: size ?? 16, color: outlineColor),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+      child: buttonChild,
     );
 
+    // Return either full-width or default button based on isFullRow
     return isFullRow ? SizedBox(width: double.infinity, child: button) : button;
   }
 }
+
 
 Widget customInput(
   ThemeData theme,
@@ -82,7 +89,7 @@ Widget customInput(
   final ValueNotifier<bool> obscure = ValueNotifier<bool>(isPassword);
 
   return SizedBox(
-    height: 40,
+    height: 35,
     child: ValueListenableBuilder(
       valueListenable: obscure,
       builder: (context, value, child) {
