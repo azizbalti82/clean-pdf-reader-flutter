@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 
-class PDFController extends GetxController {
+import '../../features/pdf listing/models/pdf.dart';
+
+class PdfListsProvider extends GetxController {
   // Observable lists for PDF data
   List<String> allPDF = []; // homePDF
 
   RxList<String> homePDF = <String>[].obs; // homePDF
-  RxList<String> recentPDF = <String>[].obs; // recentPDF
+  RxList<Pdf> recentPDF = <Pdf>[].obs; // recentPDF
   RxList<String> bookmarkPDF = <String>[].obs; // bookmarkPDF
 
   void initAllPDF(List<String> newPDFs, String sortType) {
@@ -19,7 +21,7 @@ class PDFController extends GetxController {
 
   void sort(String sortType){
     _sortHelper(homePDF,sortType);
-    _sortHelper(recentPDF,sortType);
+    _sortHelperRecent(recentPDF);
     _sortHelper(bookmarkPDF,sortType);
   }
   void _sortHelper(List<String> list, String sortType){
@@ -70,6 +72,11 @@ class PDFController extends GetxController {
         });
     }
   }
+  void _sortHelperRecent(List<Pdf> list) {
+    list.sort((a, b) {
+      return a.lastOpenDate.compareTo(b.lastOpenDate);
+    });
+  }
 
   // Method to update homePDF
   void updateHomePDF(List<String> newPDFs) {
@@ -77,7 +84,7 @@ class PDFController extends GetxController {
   }
 
   // Method to update recentPDF
-  void updateRecentPDF(List<String> newPDFs) {
+  void updateRecentPDF(List<Pdf> newPDFs) {
     recentPDF.value = newPDFs;
   }
 

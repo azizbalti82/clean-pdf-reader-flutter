@@ -8,6 +8,8 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../../core/provider/settings_provider.dart';
+import '../../../../../core/services/settings_service.dart';
 import '../../../../../core/utils/constants.dart';
 import '../../../../../core/widgets/form.dart';
 import 'package:path/path.dart' as path_ob;
@@ -16,17 +18,18 @@ import '../../../../../core/widgets/toasts.dart';
 import '../../../../../main.dart';
 
 
-class PdfOptionsBottomSheetView extends StatelessWidget {
-  const PdfOptionsBottomSheetView({super.key, required this.path});
-  final String path;
+class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
+  PdfPreviewOptionsBottomSheetView({super.key});
+
+  final SettingsProvider settingsProvider = Get.put(SettingsProvider());
 
   @override
   Widget build(BuildContext context) {
     return Material(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        padding: const EdgeInsets.symmetric(vertical:12,horizontal: 30 ),
+        child: Obx(() { return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 4),
             Align(
@@ -41,97 +44,109 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
+            Text("Scroll Direction",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
+            const SizedBox(height: 20),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(width: 15),
-                Icon(
-                      Icons.picture_as_pdf,
-                      size: 40,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.6),
-                ),
-                SizedBox(width: 15),
-                buildPdfInfoColumn(path),
-                IconButton(onPressed: (){
-                  //add to bookmark
-                }, icon: FaIcon(FontAwesomeIcons.bookmark, size: 25),),
+                 selectableItem("vertical",settingsProvider.isVertical.value,context,(){
+                   SettingsService.saveIsVertical(true);
+                   settingsProvider.updateIsVertical(true);
+                 }),
+                SizedBox(width: 12,),
+                selectableItem("Horizontal",!settingsProvider.isVertical.value,context,(){
+                  SettingsService.saveIsVertical(false);
+                  settingsProvider.updateIsVertical(false);
+                }),
               ],
             ),
-            SizedBox(height: 30),
+            if(!settingsProvider.isVertical.value)
+              const SizedBox(height: 20),
+            if(!settingsProvider.isVertical.value)
+              Text("Reading Direction",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
+            if(!settingsProvider.isVertical.value)
+              const SizedBox(height: 20),
+            if(!settingsProvider.isVertical.value)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                selectableItem("LTR",settingsProvider.isLTR.value,context,(){
+                  SettingsService.saveIsLTR(true);
+                  settingsProvider.updateIsLTR(true);
+                }),
+                SizedBox(width: 12,),
+                selectableItem("RTL",!settingsProvider.isLTR.value,context,(){
+                  SettingsService.saveIsLTR(false);
+                  settingsProvider.updateIsLTR(false);
+                }),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text("Page Transition",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                selectableItem("Continuous",settingsProvider.isContinuous.value,context,(){
+                  SettingsService.saveIsContinuous(true);
+                  settingsProvider.updateIsContinuous(true);
+                }),
+                SizedBox(width: 12,),
+                selectableItem("Jump",!settingsProvider.isContinuous.value,context,(){
+                  SettingsService.saveIsContinuous(false);
+                  settingsProvider.updateIsContinuous(false);
+                }),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text("Theme",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                selectableItem("Default",!settingsProvider.isDark.value && !settingsProvider.isYellow.value,context,(){
+                  SettingsService.saveIsDark(false);
+                  settingsProvider.updateIsDark(false);
+                }),
+                SizedBox(width: 12,),
+                selectableItem("Dark",settingsProvider.isDark.value,context,(){
+                  SettingsService.saveIsDark(true);
+                  SettingsService.saveIsYellow(false);
+                  settingsProvider.updateIsDark(true);
+                  settingsProvider.updateIsYellow(false);
 
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: EdgeInsets.all(0),
-                child: Container(
-                  width: double.infinity,
-                  height: 1,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.075),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
+                }),
+                SizedBox(width: 12,),
+                selectableItem("Yellow",settingsProvider.isYellow.value,context,(){
+                  SettingsService.saveIsYellow(true);
+                  settingsProvider.updateIsYellow(true);
+                  SettingsService.saveIsDark(false);
+                  settingsProvider.updateIsDark(false);
+                }),
+              ],
             ),
-            SizedBox(height: 20),
-            buildClickableRow(
-              icon: FontAwesomeIcons.shareFromSquare,
-              text: "Share",
-              iconColor:Theme.of(
-                context,
-              ).colorScheme.onSurface.withOpacity(0.7) ,
-              onTap: () async{
-                await sharePdfFile(
-                path,
-                subject: "Share PDF",
-                text: path_ob.basenameWithoutExtension(path),
-                );
-              },
-            ),
-            SizedBox(height: 10),
-            buildClickableRow(
-              icon: FontAwesomeIcons.edit,
-              text: "Rename",
-              iconColor:Theme.of(
-                context,
-              ).colorScheme.onSurface.withOpacity(0.7) ,
-              onTap: () async{
-                bool result = await renameFile(path,context);
-                if(result){
-                  Toast.showSuccess("PDF renamed successfully!", context);
-                }else{
-                  Toast.showError("Error while renaming PDF", context);
-                }
-              },
-            ),
-            SizedBox(height: 10),
-            buildClickableRow(
-              icon: FontAwesomeIcons.trashCan,
-              text: "Delete",
-              textColor: Theme.of(
-                context,
-              ).colorScheme.error.withOpacity(0.7) ,
-              iconColor:Theme.of(
-                context,
-              ).colorScheme.error.withOpacity(0.7) ,
-              spacing: 32,
-              onTap: () async{
-                bool result = await deleteFile(path,context);
-                if(result){
-                  Toast.showSuccess("PDF deleted successfully!", context);
-                }else{
-                  Toast.showError("Error while deleting PDF", context);
-                }
-              },
-            ),
-
             const SizedBox(height: 20),
           ],
-        ),
+        );}),
       ),
+    );
+  }
+
+
+  Widget selectableItem(String name,bool isSelected,BuildContext context,Function() f){
+    Color accent = Theme.of(context).colorScheme.primary;
+    Color card = Theme.of(context).cardColor;
+    return GestureDetector(
+      onTap: f,
+      child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 15,vertical: 7),
+          decoration: BoxDecoration(
+              color: isSelected ? accent.withOpacity(0.2) : card,
+              borderRadius: BorderRadius.circular(20),
+              border: isSelected ? Border.all(color: accent.withOpacity(0.8)):null
+          ),
+          child: Text(name,style: Theme.of(context).textTheme.titleMedium?.copyWith(color: isSelected ? accent:Theme.of(context).colorScheme.onBackground),
+          )),
     );
   }
 
@@ -309,85 +324,4 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
       ),
     );
   }
-  Widget buildPdfInfoColumn(String filePath) {
-    return FutureBuilder<Map<String, String>>(
-      future: _getPdfInfo(filePath),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(path_ob.basenameWithoutExtension(filePath)),
-              SizedBox(height: 4),
-              Text(
-                "Loading...",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          );
-        }
-
-        final info = snapshot.data ?? {};
-
-        return Expanded(child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              path_ob.basenameWithoutExtension(filePath),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 2,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: 4),
-            Text(
-              "${info['date'] ?? 'Unknown'} | Size: ${info['size'] ?? 'Unknown'}",
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ));
-      },
-    );
-  }
-  Future<Map<String, String>> _getPdfInfo(String filePath) async {
-    try {
-      final file = File(filePath);
-      final stat = await file.stat();
-
-      // Format the date
-      final dateFormat = DateFormat('MMM dd, yyyy');
-      final formattedDate = dateFormat.format(stat.modified);
-
-      // Format the file size
-      final sizeInBytes = stat.size;
-      final formattedSize = _formatFileSize(sizeInBytes);
-
-      return {
-        'date': formattedDate,
-        'size': formattedSize,
-      };
-    } catch (e) {
-      return {
-        'date': 'Unknown',
-        'size': 'Unknown',
-      };
-    }
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
-  }
-
 }

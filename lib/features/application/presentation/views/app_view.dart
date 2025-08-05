@@ -10,6 +10,7 @@ import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/utils/assets_data.dart';
 import '../../../../core/widgets/form.dart';
 import '../../../pdf listing/presentation/views/home_view.dart';
+import '../../../pdf preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 
 class AppView extends StatefulWidget {
   const AppView({super.key});
@@ -147,7 +148,7 @@ class _AppViewState extends State<AppView> {
   }
 
   Widget _getAppBar(int currentIndex) {
-    final PDFController pdfController = Get.put(PDFController());
+    final PdfListsProvider pdfController = Get.put(PdfListsProvider());
     final List<String> titles = ["All files ", "Recent", "Bookmarks"];
     if (isSearchEnabled && _currentIndex == 0) {
       return Row(

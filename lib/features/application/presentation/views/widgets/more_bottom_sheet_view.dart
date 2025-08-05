@@ -14,7 +14,7 @@ class MoreBottomSheetView extends StatelessWidget {
   MoreBottomSheetView({super.key});
 
   final SettingsProvider settingsProvider = Get.put(SettingsProvider());
-  final PDFController pdfController = Get.put(PDFController());
+  final PdfListsProvider pdfController = Get.put(PdfListsProvider());
 
   static const _sortOptions = [
     ('Name', 'name'),
@@ -40,11 +40,9 @@ class MoreBottomSheetView extends StatelessWidget {
         children: [
           const SizedBox(height: 4),
           _buildHandle(colorScheme),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           _buildSettingsSection(context),
           _buildContactSection(),
-          _buildAboutSection(context, isLandscape),
-          const SizedBox(height: 10),
           _buildVersionText(context),
           const SizedBox(height: 10),
         ],
@@ -67,8 +65,8 @@ class MoreBottomSheetView extends StatelessWidget {
     icon: Icons.settings,
     children: [
       Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: 5,
+        runSpacing: 5,
         children: [
           _buildSortButton(),
           _buildViewButton(),
@@ -129,8 +127,8 @@ class MoreBottomSheetView extends StatelessWidget {
 
   Widget _buildContactSection() => _buildSection(
     null,
-    title: "Contact Us",
-    icon: Icons.email,
+    title: "About App",
+    icon: Icons.info,
     children: [
       Row(
         children: [
@@ -140,18 +138,9 @@ class MoreBottomSheetView extends StatelessWidget {
         ],
       ),
       _buildWebsiteButton(),
-    ],
-  );
-
-  Widget _buildAboutSection(BuildContext context, bool isLandscape) => _buildSection(
-    context,
-    title: "About",
-    icon: Icons.info,
-    children: [
       _buildRateButton(),
       _buildPrivacyButton(),
     ],
-    isVertical: !isLandscape,
   );
 
   Widget _buildEmailButton() => CustomButtonOutline(
@@ -179,6 +168,7 @@ class MoreBottomSheetView extends StatelessWidget {
 
   Widget _buildRateButton() => CustomButtonOutline(
     text: "Rate us",
+    icon: "stars",
     isLoading: false,
     onPressed: () => EasyLauncher.url(
       url: "https://play.google.com/store/apps/details?id=com.baltcode.watchy",
@@ -187,6 +177,7 @@ class MoreBottomSheetView extends StatelessWidget {
 
   Widget _buildPrivacyButton() => CustomButtonOutline(
     text: "Privacy policy",
+    icon: "privacy",
     isLoading: false,
     onPressed: () => EasyLauncher.url(
       url: "https://azizbalti.netlify.app/projects/lingua/it/privacy.html",
@@ -220,10 +211,10 @@ class MoreBottomSheetView extends StatelessWidget {
     return Card(
       color: colorScheme.surface,
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 10,left: 10,right: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           children: [
             Row(
@@ -239,12 +230,12 @@ class MoreBottomSheetView extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
             isVertical
                 ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: items.map((item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
+                padding: const EdgeInsets.symmetric(vertical: 3),
                 child: item,
               )).toList(),
             )

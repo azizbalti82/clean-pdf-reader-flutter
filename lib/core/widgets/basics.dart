@@ -9,6 +9,9 @@ import 'package:path/path.dart' as path;
 import 'package:pdf_reader/main.dart';
 
 import '../../features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
+import '../../features/pdf listing/models/pdf.dart';
+import '../../features/pdf listing/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
+import '../../features/pdf listing/services/pdf_service.dart';
 import '../../features/pdf preview/presentation/views/pdf_preview_view.dart';
 import '../../features/pdf preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 import '../provider/settings_provider.dart';
@@ -57,7 +60,8 @@ Widget simpleAppBar(BuildContext context, {required String text}) {
 Widget booksGridView(
   List<String> list, {
   String? icon,
-  Function(String item)? onTap,
+      required bool isRecent,
+      Function(String item)? onTap,
 }) {
   SettingsProvider settingsProvider= Get.put(SettingsProvider());
 
@@ -79,6 +83,7 @@ Widget booksGridView(
             final item = list[index];
             return pdfItem(
               filePath: item,
+              isRecent:isRecent,
               context: context,
               onTap: () => onTap?.call(item),
             );
@@ -94,6 +99,7 @@ Widget booksListView(
   String? icon,
   Function(String item)? onTap,
   required BuildContext context,
+      required bool isRecent
 }) {
   return Column(
     mainAxisSize: MainAxisSize.min,
@@ -103,6 +109,7 @@ Widget booksListView(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: pdfItemInline(
               filePath: item,
+              isRecent: isRecent,
               context: context,
               onTap: () => onTap?.call(item),
             ),
@@ -114,6 +121,7 @@ Widget booksListView(
 
 Widget pdfItem({
   required String filePath,
+  required bool isRecent,
   required BuildContext context,
   VoidCallback? onTap,
 }) {
@@ -125,7 +133,7 @@ Widget pdfItem({
       showCupertinoModalBottomSheet(
         topRadius: Radius.circular(25),
         context: context,
-        builder: (context) => PdfOptionsBottomSheetView(path: filePath),
+        builder: (context) => PdfOptionsBottomSheetView(path: filePath,fromPreview: false,),
       );
     },
     child: Container(
@@ -202,16 +210,40 @@ Widget pdfItem({
           ),
           // File info section
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 16),
-            child: Text(
-              path.basenameWithoutExtension(filePath),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w400,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  path.basenameWithoutExtension(filePath),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                if(isRecent)
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 3,horizontal: 7),
+                    margin: EdgeInsets.symmetric(vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      getTimeSinceLastOpen(path:filePath),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w400,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )
+              ],
             ),
           ),
         ],
@@ -223,6 +255,7 @@ Widget pdfItem({
 Widget pdfItemInline({
   required String filePath,
   required BuildContext context,
+  required bool isRecent,
   VoidCallback? onTap,
 })
 {
@@ -234,7 +267,7 @@ Widget pdfItemInline({
       showCupertinoModalBottomSheet(
         topRadius: Radius.circular(25),
         context: context,
-        builder: (context) => PdfOptionsBottomSheetView(path:filePath),
+        builder: (context) => PdfOptionsBottomSheetView(path:filePath,fromPreview: false,),
       );
     },
     child: Container(
@@ -279,15 +312,39 @@ Widget pdfItemInline({
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Text(
-                path.basenameWithoutExtension(filePath),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    path.basenameWithoutExtension(filePath),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if(isRecent)
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 3,horizontal: 7),
+                    margin: EdgeInsets.symmetric(vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      getTimeSinceLastOpen(path:filePath),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w400,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )
+                ],
+              )
             ),
           ),
 
@@ -304,3 +361,37 @@ Widget pdfItemInline({
     ),
   );
 }
+
+String getTimeSinceLastOpen({required String path}) {
+  Pdf? pdf = PdfService.getPdf(path);
+
+  if (pdf == null) {
+    return 'No data';
+  }
+
+  DateTime now = DateTime.now();
+  Duration difference = now.difference(pdf.lastOpenDate);
+
+  if (difference.inSeconds < 10) {
+    return 'now';
+  } else if (difference.inSeconds < 60) {
+    return '${difference.inSeconds} sec ago';
+  } else if (difference.inMinutes < 60) {
+    return '${difference.inMinutes} min ago';
+  } else if (difference.inHours < 24) {
+    return '${difference.inHours} hr ago';
+  } else if (difference.inDays < 7) {
+    return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
+  } else if (difference.inDays < 30) {
+    int weeks = (difference.inDays / 7).floor();
+    return '$weeks wk${weeks == 1 ? '' : 's'} ago';
+  } else if (difference.inDays < 365) {
+    int months = (difference.inDays / 30).floor();
+    return '$months mo${months == 1 ? '' : 's'} ago';
+  } else {
+    int years = (difference.inDays / 365).floor();
+    return '$years yr${years == 1 ? '' : 's'} ago';
+  }
+}
+
+

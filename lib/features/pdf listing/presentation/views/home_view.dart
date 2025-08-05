@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pdf_reader/features/pdf%20listing/models/pdf.dart';
 
 import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/provider/settings_provider.dart';
@@ -13,13 +14,13 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  late PDFController pdfController;
+  late PdfListsProvider pdfController;
   late SettingsProvider settingsProvider;
 
   @override
   void initState() {
     super.initState();
-    pdfController = Get.put(PDFController());
+    pdfController = Get.put(PdfListsProvider());
     settingsProvider = Get.put(SettingsProvider());
   }
 
@@ -31,11 +32,14 @@ class _HomeViewState extends State<HomeView> {
         //get list depending on section
         List<String> pdfList = [];
         if (widget.type == "pdf listing") {
-          pdfList = pdfController.homePDF.value;
+          pdfList = pdfController.homePDF;
         } else if (widget.type == "recent") {
-          pdfList = pdfController.recentPDF.value;
+          for(Pdf p in pdfController.recentPDF){
+            print(p.path);
+          }
+          pdfList = pdfController.recentPDF.reversed.map((p)=>p.path).toList();
         } else if (widget.type == "bookmark") {
-          pdfList = pdfController.bookmarkPDF.value;
+          pdfList = pdfController.bookmarkPDF;
         }
         return (pdfList.isEmpty)
             ? Center(
@@ -51,8 +55,8 @@ class _HomeViewState extends State<HomeView> {
                 ),
               )
             : settingsProvider.isGrid.value
-            ? booksGridView(pdfList)
-            : booksListView(pdfList, context: context);
+            ? booksGridView(pdfList,isRecent:widget.type == "recent")
+            : booksListView(pdfList,isRecent:widget.type == "recent", context: context);
       }),
     );
   }
