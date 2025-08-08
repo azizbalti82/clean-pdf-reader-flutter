@@ -1,7 +1,5 @@
 name: pdf_reader
-description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
+description: "the cleanest pdf reader"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
@@ -37,7 +35,6 @@ dependencies:
   hive: 2.2.3
   hive_flutter: ^1.1.0
   shimmer: ^3.0.0
-  syncfusion_flutter_pdfviewer: ^30.2.4
   flutter_pdfview: ^1.4.1+1
 
 

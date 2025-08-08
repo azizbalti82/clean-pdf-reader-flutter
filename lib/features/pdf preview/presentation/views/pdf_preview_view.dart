@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data'; // For Uint8List
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_fullscreen/flutter_fullscreen.dart';
@@ -11,19 +15,13 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path_ob;
 import 'package:pdf_reader/core/widgets/toasts.dart';
 import 'package:pdf_reader/features/pdf%20preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
-import 'package:pdfx/pdfx.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+
 import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/provider/settings_provider.dart';
 import '../../../../core/utils/theme_data.dart';
 import '../../../pdf listing/models/pdf.dart';
 import '../../../pdf listing/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 import '../../../pdf listing/services/pdf_service.dart';
-
-import 'package:pdfx/pdfx.dart';
-import 'package:photo_view/photo_view.dart';
-import 'dart:typed_data'; // For Uint8List
-import 'package:flutter/material.dart';
 
 class PdfPreviewView extends StatefulWidget {
   const PdfPreviewView({super.key, required this.pdfPath});
@@ -39,7 +37,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
 
   late String pdfPath;
   Timer? _autoFullscreenTimer;
-  PdfController? pdfxController;
   bool isLoading = true;
   String? errorMessage;
   int currentPage = 1;
@@ -49,7 +46,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   late ThemeData theme;
   ScrollController? _scrollController;
   Timer? _debounceTimer;
-  late PdfViewerController _pdfViewerController;
 
 
   @override
@@ -59,7 +55,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     _scrollController = ScrollController();
     pdfController = Get.put(PdfListsProvider());
     settingsProvider = Get.put(SettingsProvider());
-    _pdfViewerController = PdfViewerController();
 
     WidgetsBinding.instance.addObserver(this);
     resetTimer();
@@ -79,7 +74,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     super.dispose();
     FullScreen.setFullScreen(false);
     _autoFullscreenTimer?.cancel();
-    pdfxController?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _scrollController?.dispose();
     _debounceTimer?.cancel();
@@ -371,96 +365,79 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   }
 
   Widget pdfViewer() {
-    return Directionality(
-      textDirection: !settingsProvider.isLTR.value && !settingsProvider.isVertical.value
-          ? TextDirection.rtl
-          : TextDirection.ltr,
-      child:
+    return Stack(
+      children: [
+        Directionality(
+          textDirection: !settingsProvider.isLTR.value && !settingsProvider.isVertical.value
+              ? TextDirection.rtl
+              : TextDirection.ltr,
+          child:PDFView(
+              filePath: pdfPath,
+              defaultPage: currentPage,
+              enableSwipe: true,
+              swipeHorizontal: !settingsProvider.isVertical.value,
+              autoSpacing: false,
+              pageFling: false,
+              pageSnap: !settingsProvider.isContinuous.value,
+              backgroundColor: Colors.white,
+              onError: (error) {
+                if (mounted) {
+                  // Handle error - maybe show a retry button
+                  print('PDF load failed: ${error.toString()}');
+                }
+              },
+              onPageError: (page, error) {
+                if (mounted) {
+                  // Handle error - maybe show a retry button
+                  print('page $page load failed: $error');
+                }
+              },
+              onPageChanged: (page,total) {
+                // Use more aggressive debouncing to reduce state updates
+                _pageChangeDebouncer?.cancel();
+                _pageChangeDebouncer = Timer(const Duration(milliseconds: 300), () {
+                  if (mounted && currentPage != page!) {
+                    setState(() {
+                      currentPage = page;
+                    });
+                    addToRecent(updateCurrentPage: true);
+                  }
+                });
+              },
+              onViewCreated: (c) async{
+                if (mounted) {
+                  pagesNumber = (await c.getPageCount())!;
+                  setState(() {
+                  });
 
+                  // Pre-cache adjacent pages for smoother scrolling
+                  // _precacheAdjacentPages();
+                }
+              },
+            ),
+        ),
 
-      SfPdfViewer.file(
-        File(pdfPath),
-        controller: _pdfViewerController,
-        initialPageNumber: currentPage,
-        canShowScrollHead: isOptionsShown,
+        GestureDetector(
+          behavior: HitTestBehavior.translucent, //to listen for tap events on an empty container
 
-        // Performance optimizations
-        pageSpacing: 4, // Reduce spacing between pages
-        enableDoubleTapZooming: false, // Disable if not needed
-        interactionMode: PdfInteractionMode.pan, // Simpler interaction
-
-        // Scroll direction and layout
-        scrollDirection: settingsProvider.isVertical.value
-            ? PdfScrollDirection.vertical
-            : PdfScrollDirection.horizontal,
-        pageLayoutMode: settingsProvider.isContinuous.value
-            ? PdfPageLayoutMode.continuous
-            : PdfPageLayoutMode.single,
-
-        enableTextSelection: false,
-
-        // Optimized callbacks with debouncing
-        onDocumentLoaded: (PdfDocumentLoadedDetails details) {
-          if (mounted) {
+          onTap: (){
             setState(() {
-              pagesNumber = details.document.pages.count;
+              isOptionsShown = !isOptionsShown;
             });
+            resetTimer();
+          },
 
-            // Pre-cache adjacent pages for smoother scrolling
-            _precacheAdjacentPages();
-          }
-        },
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+          ),
+        )
 
-        onPageChanged: (PdfPageChangedDetails details) {
-          // Use more aggressive debouncing to reduce state updates
-          _pageChangeDebouncer?.cancel();
-          _pageChangeDebouncer = Timer(const Duration(milliseconds: 300), () {
-            if (mounted && currentPage != details.newPageNumber) {
-              setState(() {
-                currentPage = details.newPageNumber;
-              });
-              addToRecent(updateCurrentPage: true);
-            }
-          });
-        },
-
-        onTap: (PdfGestureDetails details) {
-          setState(() {
-            isOptionsShown = !isOptionsShown;
-          });
-          resetTimer();
-        },
-
-        // Error handling
-        onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
-          if (mounted) {
-            // Handle error - maybe show a retry button
-            print('PDF load failed: ${details.error}');
-          }
-        },
-      ),
-
-
+      ],
     );
   }
   Timer? _pageChangeDebouncer;
   Timer? _precacheTimer;
-  void _precacheAdjacentPages() {
-    _precacheTimer?.cancel();
-    _precacheTimer = Timer(const Duration(milliseconds: 500), () {
-      if (mounted && _pdfViewerController.pageNumber > 0) {
-        final currentPageNum = _pdfViewerController.pageNumber;
-
-        // Pre-render next few pages in background (if not already rendered)
-        for (int i = 1; i <= 3; i++) {
-          if (currentPageNum + i <= pagesNumber) {
-            // This helps with smoother scrolling by pre-loading pages
-            // The controller will handle caching automatically
-          }
-        }
-      }
-    });
-  }
 
   /// functions ----------------------------------------------------------------
   void goToPage(int pagesCount) async {
@@ -506,7 +483,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
 
       if (newValue != null && newValue.isNotEmpty) {
         currentPage = int.parse(newValue);
-        pdfxController?.jumpToPage(currentPage-1);
       }
     } catch (e) {
       // Handle error if necessary

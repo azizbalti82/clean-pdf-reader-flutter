@@ -119,6 +119,7 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                 }),
               ],
             ),
+            /*
             const SizedBox(height: 20),
             Text("Pages Quality",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
             const SizedBox(height: 20),
@@ -151,6 +152,8 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                 }),
               ],
             ),
+
+             */
             const SizedBox(height: 20),
           ],
         );}),
