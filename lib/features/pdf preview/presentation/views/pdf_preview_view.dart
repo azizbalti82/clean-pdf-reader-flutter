@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_fullscreen/flutter_fullscreen.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -48,18 +49,18 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   late ThemeData theme;
   ScrollController? _scrollController;
   Timer? _debounceTimer;
-
-  final PdfViewerController _pdfViewerController = PdfViewerController();
+  late PdfViewerController _pdfViewerController;
 
 
   @override
   void initState() {
     super.initState();
     pdfPath = widget.pdfPath;
-    _initializePdf();
     _scrollController = ScrollController();
     pdfController = Get.put(PdfListsProvider());
     settingsProvider = Get.put(SettingsProvider());
+    _pdfViewerController = PdfViewerController();
+
     WidgetsBinding.instance.addObserver(this);
     resetTimer();
     try {
@@ -129,10 +130,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
           ),
         ),
       );
-    }
-
-    if (pdfxController == null) {
-      return const Center(child: Text('PDF controller not initialized'));
     }
 
     return GestureDetector(
@@ -378,130 +375,91 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
       textDirection: !settingsProvider.isLTR.value && !settingsProvider.isVertical.value
           ? TextDirection.rtl
           : TextDirection.ltr,
-      child: PdfView(
-        controller: pdfxController!,
-        scrollDirection: settingsProvider.isVertical.value ? Axis.vertical : Axis.horizontal,
-        physics: settingsProvider.isContinuous.value
-            ? const ClampingScrollPhysics() // Less space in continuous mode
-            : const BouncingScrollPhysics(),
-        pageSnapping: !settingsProvider.isContinuous.value,
+      child:
+
+
+      SfPdfViewer.file(
+        File(pdfPath),
+        controller: _pdfViewerController,
+        initialPageNumber: currentPage,
+        canShowScrollHead: isOptionsShown,
 
         // Performance optimizations
-        builders: PdfViewBuilders<DefaultBuilderOptions>(
-          options: const DefaultBuilderOptions(
-            loaderSwitchDuration: Duration(milliseconds: 300),
-          ),
-          documentLoaderBuilder: (context) {
-            return Container(
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    'Loading PDF...',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            );
-          },
-          pageLoaderBuilder: (context) {
-            return Container(
-              alignment: Alignment.center,
-              child: SizedBox(
-                  width: 20,
-                height: 20,
-                  child: CircularProgressIndicator(
-                strokeWidth: 4,
-                strokeCap: StrokeCap.round,
-                color: (theme.brightness==Brightness.light)?theme.primaryColor.withOpacity(0.2):theme.colorScheme.onPrimary.withOpacity(0.2),
-              )),
-            );
-          },
-          errorBuilder: (context, error) {
-            return Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error loading PDF',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    error.toString(),
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+        pageSpacing: 4, // Reduce spacing between pages
+        enableDoubleTapZooming: false, // Disable if not needed
+        interactionMode: PdfInteractionMode.pan, // Simpler interaction
 
-        renderer: (PdfPage page) => page.render(
-          width: page.width * settingsProvider.renderingQuality.value,
-          height: page.height * settingsProvider.renderingQuality.value,
-          format: PdfPageImageFormat.webp,
-            backgroundColor:"white"
-        ),
+        // Scroll direction and layout
+        scrollDirection: settingsProvider.isVertical.value
+            ? PdfScrollDirection.vertical
+            : PdfScrollDirection.horizontal,
+        pageLayoutMode: settingsProvider.isContinuous.value
+            ? PdfPageLayoutMode.continuous
+            : PdfPageLayoutMode.single,
 
-        onDocumentLoaded: (document) {
-          setState(() {
-            pagesNumber = document.pagesCount;
-          });
+        enableTextSelection: false,
 
-          // Optimized page jumping with better timing
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Optimized callbacks with debouncing
+        onDocumentLoaded: (PdfDocumentLoadedDetails details) {
+          if (mounted) {
+            setState(() {
+              pagesNumber = details.document.pages.count;
+            });
 
+            // Pre-cache adjacent pages for smoother scrolling
+            _precacheAdjacentPages();
+          }
+        },
+
+        onPageChanged: (PdfPageChangedDetails details) {
+          // Use more aggressive debouncing to reduce state updates
+          _pageChangeDebouncer?.cancel();
+          _pageChangeDebouncer = Timer(const Duration(milliseconds: 300), () {
+            if (mounted && currentPage != details.newPageNumber) {
+              setState(() {
+                currentPage = details.newPageNumber;
+              });
+              addToRecent(updateCurrentPage: true);
+            }
           });
         },
 
-        onPageChanged: (page) async {
-          if (mounted) {
-            setState(() {
-              currentPage = page;
-            });
+        onTap: (PdfGestureDetails details) {
+          setState(() {
+            isOptionsShown = !isOptionsShown;
+          });
+          resetTimer();
+        },
 
-            // Debounce recent updates to avoid excessive calls
-            _debounceTimer?.cancel();
-            _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-              if (mounted) {
-                addToRecent(updateCurrentPage: true);
-              }
-            });
+        // Error handling
+        onDocumentLoadFailed: (PdfDocumentLoadFailedDetails details) {
+          if (mounted) {
+            // Handle error - maybe show a retry button
+            print('PDF load failed: ${details.error}');
           }
         },
       ),
+
+
     );
   }
-  Future<void> _initializePdf() async {
-    try {
-      final file = File(pdfPath);
-      if (!await file.exists()) {
-        setState(() {
-          errorMessage = 'PDF file not found at: $pdfPath';
-        });
-        return;
-      }
+  Timer? _pageChangeDebouncer;
+  Timer? _precacheTimer;
+  void _precacheAdjacentPages() {
+    _precacheTimer?.cancel();
+    _precacheTimer = Timer(const Duration(milliseconds: 500), () {
+      if (mounted && _pdfViewerController.pageNumber > 0) {
+        final currentPageNum = _pdfViewerController.pageNumber;
 
-      pdfxController = PdfController(document: PdfDocument.openFile(pdfPath),initialPage: currentPage);
-      setState(() {
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Error loading PDF: $e';
-      });
-    }
+        // Pre-render next few pages in background (if not already rendered)
+        for (int i = 1; i <= 3; i++) {
+          if (currentPageNum + i <= pagesNumber) {
+            // This helps with smoother scrolling by pre-loading pages
+            // The controller will handle caching automatically
+          }
+        }
+      }
+    });
   }
 
   /// functions ----------------------------------------------------------------

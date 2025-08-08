@@ -38,6 +38,7 @@ dependencies:
   hive_flutter: ^1.1.0
   shimmer: ^3.0.0
   syncfusion_flutter_pdfviewer: ^30.2.4
+  flutter_pdfview: ^1.4.1+1
 
 
 dev_dependencies:
