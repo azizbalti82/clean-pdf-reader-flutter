@@ -1,17 +1,17 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_fullscreen/flutter_fullscreen.dart';
-
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:path/path.dart' as path_ob;
+import 'package:pdf_reader/core/widgets/toasts.dart';
 import 'package:pdf_reader/features/pdf%20preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 import 'package:pdfx/pdfx.dart';
-import 'package:path/path.dart' as path_ob;
-
-import 'package:get/get.dart';
-import 'dart:async';
-import 'dart:io';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/provider/settings_provider.dart';
 import '../../../../core/utils/theme_data.dart';
@@ -19,10 +19,14 @@ import '../../../pdf listing/models/pdf.dart';
 import '../../../pdf listing/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 import '../../../pdf listing/services/pdf_service.dart';
 
+import 'package:pdfx/pdfx.dart';
+import 'package:photo_view/photo_view.dart';
+import 'dart:typed_data'; // For Uint8List
+import 'package:flutter/material.dart';
+
 class PdfPreviewView extends StatefulWidget {
   const PdfPreviewView({super.key, required this.pdfPath});
   final String pdfPath;
-
   @override
   State<PdfPreviewView> createState() => _PdfPreviewViewState();
 }
@@ -45,17 +49,19 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   ScrollController? _scrollController;
   Timer? _debounceTimer;
 
+  final PdfViewerController _pdfViewerController = PdfViewerController();
+
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _enableFullscreen());
-    _scrollController = ScrollController();
     pdfPath = widget.pdfPath;
+    _initializePdf();
+    _scrollController = ScrollController();
     pdfController = Get.put(PdfListsProvider());
     settingsProvider = Get.put(SettingsProvider());
     WidgetsBinding.instance.addObserver(this);
     resetTimer();
-    _initializePdf();
     try {
       currentPage = pdfController.recentPDF
           .firstWhere((p) => p.path == pdfPath)
@@ -63,31 +69,32 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     } catch (e) {
       currentPage = 1;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _enableFullscreen());
     addToRecent();
   }
 
   @override
   void dispose() {
     super.dispose();
+    FullScreen.setFullScreen(false);
     _autoFullscreenTimer?.cancel();
     pdfxController?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _scrollController?.dispose();
     _debounceTimer?.cancel();
-    FullScreen.setFullScreen(false);
   }
 
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) => _enableFullscreen());
-
     return Obx(() {
-      theme = settingsProvider.isDark.value
+      theme = settingsProvider.isDark.value || settingsProvider.isYellow.value
           ? AppTheme.darkTheme
-          : Theme.of(context);
+          : AppTheme.lightTheme;
       return Theme(
         data: theme,
         child: Scaffold(
+          backgroundColor: theme.brightness==Brightness.light? Color(0xFFF4F8FA) : theme.colorScheme.background.withOpacity(0.6),
           body: GestureDetector(
             onTap: _onScreenTap,
             child: Container(
@@ -141,7 +148,12 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
               ? buildFilteredPDFViewer(
                   settingsProvider.isDark.value ? "dark" : "yellow",
                 )
-              :pdfViewer(),
+              :SizedBox(
+            width: double.infinity,
+            child: SizedBox.expand( // This makes the child take all available space
+              child: pdfViewer(), // Your PDF viewer widget
+            ),
+          ),
           AnimatedPositioned(
             duration: const Duration(milliseconds: 500),
             curve: Curves.easeInOut,
@@ -360,142 +372,118 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
 
     return pdfWidget;
   }
+
   Widget pdfViewer() {
     return Directionality(
-      textDirection:
-          !settingsProvider.isLTR.value && !settingsProvider.isVertical.value
+      textDirection: !settingsProvider.isLTR.value && !settingsProvider.isVertical.value
           ? TextDirection.rtl
           : TextDirection.ltr,
       child: PdfView(
-          controller: pdfxController!,
-          scrollDirection: settingsProvider.isVertical.value
-              ? Axis.vertical
-              : Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          pageSnapping: !settingsProvider.isContinuous.value,
+        controller: pdfxController!,
+        scrollDirection: settingsProvider.isVertical.value ? Axis.vertical : Axis.horizontal,
+        physics: settingsProvider.isContinuous.value
+            ? const ClampingScrollPhysics() // Less space in continuous mode
+            : const BouncingScrollPhysics(),
+        pageSnapping: !settingsProvider.isContinuous.value,
 
-          // Performance optimizations
-          builders: PdfViewBuilders<DefaultBuilderOptions>(
-            options: const DefaultBuilderOptions(
-              loaderSwitchDuration: Duration(milliseconds: 300),
-            ),
-            documentLoaderBuilder: (context) {
-              return Container(
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 16),
-                    Text(
-                      'Loading PDF...',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              );
-            },
-
-            pageLoaderBuilder: (context) {
-              return Container(
-                alignment: Alignment.center,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  color: Theme.of(context).primaryColor.withOpacity(0.7),
-                ),
-              );
-            },
-
-            errorBuilder: (context, error) {
-              return Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error loading PDF',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      error.toString(),
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              );
-            },
+        // Performance optimizations
+        builders: PdfViewBuilders<DefaultBuilderOptions>(
+          options: const DefaultBuilderOptions(
+            loaderSwitchDuration: Duration(milliseconds: 300),
           ),
-
-          onDocumentLoaded: (document) {
-            setState(() {
-              pagesNumber = document.pagesCount;
-            });
-
-            // Optimized page jumping with better timing
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Timer(const Duration(milliseconds: 200), () {
-                if (mounted && pdfxController != null) {
-                  pdfxController!.jumpToPage(currentPage - 1);
-                }
-              });
-            });
+          documentLoaderBuilder: (context) {
+            return Container(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading PDF...',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            );
           },
-
-          onPageChanged: (page) async {
-            if (mounted) {
-              setState(() {
-                currentPage = page;
-              });
-
-              // Debounce recent updates to avoid excessive calls
-              _debounceTimer?.cancel();
-              _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-                if (mounted) {
-                  addToRecent(updateCurrentPage: true);
-                }
-              });
-            }
+          pageLoaderBuilder: (context) {
+            return Container(
+              alignment: Alignment.center,
+              child: SizedBox(
+                  width: 20,
+                height: 20,
+                  child: CircularProgressIndicator(
+                strokeWidth: 4,
+                strokeCap: StrokeCap.round,
+                color: (theme.brightness==Brightness.light)?theme.primaryColor.withOpacity(0.2):theme.colorScheme.onPrimary.withOpacity(0.2),
+              )),
+            );
+          },
+          errorBuilder: (context, error) {
+            return Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading PDF',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
           },
         ),
+
+        renderer: (PdfPage page) => page.render(
+          width: page.width * settingsProvider.renderingQuality.value,
+          height: page.height * settingsProvider.renderingQuality.value,
+          format: PdfPageImageFormat.webp,
+            backgroundColor:"white"
+        ),
+
+        onDocumentLoaded: (document) {
+          setState(() {
+            pagesNumber = document.pagesCount;
+          });
+
+          // Optimized page jumping with better timing
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+
+          });
+        },
+
+        onPageChanged: (page) async {
+          if (mounted) {
+            setState(() {
+              currentPage = page;
+            });
+
+            // Debounce recent updates to avoid excessive calls
+            _debounceTimer?.cancel();
+            _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                addToRecent(updateCurrentPage: true);
+              }
+            });
+          }
+        },
+      ),
     );
   }
-
-  /// functions ----------------------------------------------------------------
-  void goToPage(int pagesCount) async {
-    try {
-      final controller = TextEditingController(text: currentPage.toString());
-      final newValue = await showDialog<String>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Go To Page'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
-            TextButton(
-              onPressed: () => Navigator.pop(context, controller.text.trim()),
-              child: Text('Go'),
-            ),
-          ],
-        ),
-      );
-
-      currentPage = int.parse(newValue.toString());
-      pdfxController?.jumpToPage(currentPage);
-    } catch (e) {
-    }
-  }
-
   Future<void> _initializePdf() async {
     try {
       final file = File(pdfPath);
@@ -505,13 +493,76 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
         });
         return;
       }
-      pdfxController = PdfController(document: PdfDocument.openFile(pdfPath));
+
+      pdfxController = PdfController(document: PdfDocument.openFile(pdfPath),initialPage: currentPage);
+      setState(() {
+      });
     } catch (e) {
       setState(() {
         errorMessage = 'Error loading PDF: $e';
       });
     }
   }
+
+  /// functions ----------------------------------------------------------------
+  void goToPage(int pagesCount) async {
+    try {
+      final controller = TextEditingController(text: currentPage.toString());
+
+      final newValue = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Go To Page'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number, // Numeric keyboard
+            inputFormatters: [
+              // Allow only numeric input
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            decoration: InputDecoration(
+              hintText: 'Enter page number',
+              errorText: _isValidInput(controller.text, pagesCount) ? null : 'Invalid page number',
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel')
+            ),
+            TextButton(
+              onPressed: () {
+                final input = controller.text.trim();
+                if (_isValidInput(input, pagesCount)) {
+                  Navigator.pop(context, input);
+                }else{
+                  Toast.showError("Enter a number from 1 to $pagesCount", context);
+                }
+              },
+              child: Text('Go'),
+            ),
+          ],
+        ),
+      );
+
+      if (newValue != null && newValue.isNotEmpty) {
+        currentPage = int.parse(newValue);
+        pdfxController?.jumpToPage(currentPage-1);
+      }
+    } catch (e) {
+      // Handle error if necessary
+      print('Error: $e');
+    }
+  }
+
+// Helper method to check if input is valid
+  bool _isValidInput(String input, int pagesCount) {
+    final page = int.tryParse(input);
+    return page != null && page >= 1 && page <= pagesCount;
+  }
+
+
   void startTimer() {
     _timer = Timer(const Duration(seconds: 3), () {
       setState(() {
@@ -540,3 +591,4 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     }
   }
 }
+

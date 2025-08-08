@@ -1,20 +1,13 @@
 import 'dart:io';
 
-import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:intl/intl.dart';
-import 'package:pull_down_button/pull_down_button.dart';
+import 'package:path/path.dart' as path_ob;
 import 'package:share_plus/share_plus.dart';
+
 import '../../../../../core/provider/settings_provider.dart';
 import '../../../../../core/services/settings_service.dart';
-import '../../../../../core/utils/constants.dart';
-import '../../../../../core/widgets/form.dart';
-import 'package:path/path.dart' as path_ob;
-
-import '../../../../../core/widgets/toasts.dart';
 import '../../../../../main.dart';
 
 
@@ -116,7 +109,6 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                   SettingsService.saveIsYellow(false);
                   settingsProvider.updateIsDark(true);
                   settingsProvider.updateIsYellow(false);
-
                 }),
                 SizedBox(width: 12,),
                 selectableItem("Yellow",settingsProvider.isYellow.value,context,(){
@@ -124,6 +116,38 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                   settingsProvider.updateIsYellow(true);
                   SettingsService.saveIsDark(false);
                   settingsProvider.updateIsDark(false);
+                }),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text("Pages Quality",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                selectableItem("1x",settingsProvider.renderingQuality.value==1,context,(){
+                  SettingsService.saveRenderingQuality(1);
+                  settingsProvider.updateRenderingQuality(1);
+                }),
+                SizedBox(width: 12,),
+                selectableItem("2x",settingsProvider.renderingQuality.value==2,context,(){
+                  SettingsService.saveRenderingQuality(2);
+                  settingsProvider.updateRenderingQuality(2);
+                }),
+                SizedBox(width: 12,),
+                selectableItem("3x",settingsProvider.renderingQuality.value==3,context,(){
+                  SettingsService.saveRenderingQuality(3);
+                  settingsProvider.updateRenderingQuality(3);
+                }),
+                SizedBox(width: 12,),
+                selectableItem("4x",settingsProvider.renderingQuality.value==4,context,(){
+                  SettingsService.saveRenderingQuality(4);
+                  settingsProvider.updateRenderingQuality(4);
+                }),
+                SizedBox(width: 12,),
+                selectableItem("5x",settingsProvider.renderingQuality.value==5,context,(){
+                  SettingsService.saveRenderingQuality(5);
+                  settingsProvider.updateRenderingQuality(5);
                 }),
               ],
             ),

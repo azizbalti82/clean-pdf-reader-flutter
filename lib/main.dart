@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pdf_reader/features/pdf%20listing/models/pdf.dart';
+
 import 'core/provider/lists_provider.dart';
 import 'core/provider/settings_provider.dart';
 import 'core/services/settings_service.dart';
@@ -24,10 +25,11 @@ Future<void> loadSettings() async {
   bool isDark = await SettingsService.getIsDark();
   bool isVertical = await SettingsService.getIsVertical();
   bool isContinuous = await SettingsService.getIsContinuous();
+  int renderingQuality = await SettingsService.getRenderingQuality();
 
 
   final SettingsProvider settingsProvider = Get.put(SettingsProvider());
-  settingsProvider.initSettings(isGrid,sortType,gridCount,isLTR,isYellow,isDark,isVertical,isContinuous);
+  settingsProvider.initSettings(isGrid,sortType,gridCount,isLTR,isYellow,isDark,isVertical,isContinuous,renderingQuality);
 }
 
 void loadPDFs() async {

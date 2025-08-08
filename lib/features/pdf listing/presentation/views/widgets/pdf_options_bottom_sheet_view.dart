@@ -1,20 +1,14 @@
 import 'dart:io';
 
-import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
-import 'package:pdf_reader/features/pdf%20listing/models/pdf.dart';
-import 'package:pull_down_button/pull_down_button.dart';
-import 'package:share_plus/share_plus.dart';
-import '../../../../../core/provider/lists_provider.dart';
-import '../../../../../core/provider/settings_provider.dart';
-import '../../../../../core/utils/constants.dart';
-import '../../../../../core/widgets/form.dart';
 import 'package:path/path.dart' as path_ob;
+import 'package:pdf_reader/features/pdf%20listing/models/pdf.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../../../core/provider/lists_provider.dart';
 import '../../../../../core/widgets/toasts.dart';
 import '../../../../../main.dart';
 import '../../../services/pdf_service.dart';
@@ -130,6 +124,7 @@ class PdfOptionsBottomSheetView extends StatelessWidget {
               },
             ),
             SizedBox(height: 10),
+            if(!fromPreview)
             buildClickableRow(
               icon: FontAwesomeIcons.edit,
               text: "Rename",

@@ -3,18 +3,14 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path;
-import 'package:pdf_reader/main.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
 import '../../features/pdf listing/models/pdf.dart';
 import '../../features/pdf listing/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 import '../../features/pdf listing/services/pdf_service.dart';
 import '../../features/pdf preview/presentation/views/pdf_preview_view.dart';
-import '../../features/pdf preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 import '../provider/settings_provider.dart';
 import '../utils/tools.dart';
 
@@ -58,42 +54,38 @@ Widget simpleAppBar(BuildContext context, {required String text}) {
   );
 }
 
+final SettingsProvider settingsProvider = Get.find<SettingsProvider>();
+
 Widget booksGridView(
-  List<String> list, {
-  String? icon,
+    List<String> list, {
+      String? icon,
       required bool isRecent,
       Function(String item)? onTap,
-}) {
-  SettingsProvider settingsProvider= Get.put(SettingsProvider());
-
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      return Obx(() {
-        return GridView.builder(
-          shrinkWrap: true,
-          itemCount: list.length,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: settingsProvider.colCount.value,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio:
-            0.6, // Adjust this to control the overall card height
-          ),
-          itemBuilder: (context, index) {
-            final item = list[index];
-            return pdfItem(
-              filePath: item,
-              isRecent:isRecent,
-              context: context,
-              onTap: () => onTap?.call(item),
-            );
-          },
+    }) {
+  return Obx(() {
+    return GridView.builder(
+      shrinkWrap: true,
+      itemCount: list.length,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: settingsProvider.colCount.value,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 0.6,
+      ),
+      itemBuilder: (context, index) {
+        final item = list[index];
+        return pdfItem(
+          filePath: item,
+          isRecent: isRecent,
+          context: context,
+          onTap: () => onTap?.call(item),
         );
-      });
-    },
-  );
+      },
+    );
+  });
 }
+
 
 Widget booksListView(
   List<String> list, {
@@ -101,7 +93,8 @@ Widget booksListView(
   Function(String item)? onTap,
   required BuildContext context,
       required bool isRecent
-}) {
+})
+{
   return Column(
     mainAxisSize: MainAxisSize.min,
     children: list
@@ -126,127 +119,12 @@ Widget pdfItem({
   required BuildContext context,
   VoidCallback? onTap,
 }) {
-  return GestureDetector(
-    onTap: () async {
-      navigate(context,PdfPreviewView(pdfPath: filePath));
-    },
-    onLongPress: () {
-      showCupertinoModalBottomSheet(
-        topRadius: Radius.circular(25),
-        context: context,
-        builder: (context) => PdfOptionsBottomSheetView(path: filePath, fromPreview: false),
-      );
-    },
-    child: Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // PDF preview area with cached thumbnail
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-              child: Container(
-                color: Theme.of(context).colorScheme.background.withOpacity(0.9),
-                width: double.infinity,
-                height: double.infinity,
-                child: FutureBuilder<Uint8List?>(
-                  future: getPdfThumbnailCached(filePath), // Use the cached version here
-                  builder: (context, snapshot) {
-                    // If data is available, display the image
-                    if (snapshot.hasData && snapshot.data != null) {
-                      return Image.memory(
-                        snapshot.data!,
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Center(
-                            child: Icon(
-                              Icons.picture_as_pdf,
-                              size: 40,
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
-                            ),
-                          );
-                        },
-                      );
-                    }
-
-                    // If the data is loading, show the shimmer animation
-                    return Shimmer.fromColors(
-                      baseColor: Theme.of(context).cardColor,
-                      highlightColor: Theme.of(context).colorScheme.surface.withOpacity(0.15),
-                      enabled: snapshot.connectionState == ConnectionState.waiting, // Only show shimmer when loading
-                      child: Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        color: Theme.of(context).colorScheme.background, // Placeholder color
-                      ),
-                    );
-                  },
-                )
-              ),
-            ),
-          ),
-          // File info section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  path.basenameWithoutExtension(filePath),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-                if (isRecent)
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 7),
-                    margin: EdgeInsets.symmetric(vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      getTimeSinceLastOpen(path: filePath),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w400,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
+  return PdfItem(
+    filePath: filePath,
+    isRecent: isRecent,
+    onTap: onTap,
   );
 }
-
 
 Widget pdfItemInline({
   required String filePath,
@@ -391,3 +269,157 @@ String getTimeSinceLastOpen({required String path}) {
 }
 
 
+
+class PdfItem extends StatefulWidget {
+  final String filePath;
+  final bool isRecent;
+  final VoidCallback? onTap;
+
+  const PdfItem({
+    Key? key,
+    required this.filePath,
+    required this.isRecent,
+    this.onTap,
+  }) : super(key: key);
+
+  @override
+  State<PdfItem> createState() => _PdfItemState();
+}
+class _PdfItemState extends State<PdfItem> with AutomaticKeepAliveClientMixin {
+  Future<Uint8List?>? _thumbnailFuture;
+  String? _currentPath;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    // Reset future if path changed
+    if (_currentPath != widget.filePath) {
+      _thumbnailFuture = null;
+      _currentPath = widget.filePath;
+    }
+
+    return GestureDetector(
+      onTap: () {
+        navigate(context, PdfPreviewView(pdfPath: widget.filePath));
+      },
+      onLongPress: () {
+        showCupertinoModalBottomSheet(
+          topRadius: Radius.circular(25),
+          context: context,
+          builder: (context) => PdfOptionsBottomSheetView(path: widget.filePath, fromPreview: false),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // PDF preview area with cached thumbnail
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+                child: Container(
+                    color: Theme.of(context).colorScheme.background.withOpacity(0.9),
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: FutureBuilder<Uint8List?>(
+                      future: _thumbnailFuture ??= getPdfThumbnailCached(widget.filePath), // Create once and cache
+                      builder: (context, snapshot) {
+                        // If data is available, display the image
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return Image.memory(
+                            snapshot.data!,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Center(
+                                child: Icon(
+                                  Icons.picture_as_pdf,
+                                  size: 40,
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                                ),
+                              );
+                            },
+                          );
+                        }
+
+                        // If the data is loading, show the shimmer animation
+                        return Shimmer.fromColors(
+                          baseColor: Theme.of(context).cardColor,
+                          highlightColor: Theme.of(context).colorScheme.surface.withOpacity(0.15),
+                          enabled: snapshot.connectionState == ConnectionState.waiting,
+                          child: Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            color: Theme.of(context).colorScheme.background,
+                          ),
+                        );
+                      },
+                    )
+                ),
+              ),
+            ),
+            // File info section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    path.basenameWithoutExtension(widget.filePath),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                  if (widget.isRecent)
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 3, horizontal: 7),
+                      margin: EdgeInsets.symmetric(vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        getTimeSinceLastOpen(path: widget.filePath),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w400,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

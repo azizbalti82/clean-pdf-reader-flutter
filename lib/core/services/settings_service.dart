@@ -1,5 +1,4 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:get/get.dart';
 
 class SettingsService {
   static final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -81,6 +80,14 @@ class SettingsService {
     return (await _prefs).getBool('is_LTR') ?? false; // default false
   }
 
+  static Future<void> saveRenderingQuality(int value) async {
+    (await _prefs).setInt('rendering_quality', value);
+  }
+
+  static Future<int> getRenderingQuality() async {
+    return (await _prefs).getInt('rendering_quality') ?? 2;
+  }
+
   // Retrieve all settings
   static Future<Map<String, dynamic>> getAllSettings() async {
     return {
@@ -92,6 +99,7 @@ class SettingsService {
       'isDark': await getIsDark(),
       'isYellow': await getIsYellow(),
       'isLTR': await getIsLTR(),
+      'renderingQuality': await getRenderingQuality(),
 
     };
   }
@@ -106,6 +114,6 @@ class SettingsService {
     await saveIsDark(settings['isDark'] ?? false);
     await saveIsYellow(settings['isYellow'] ?? false);
     await saveIsYellow(settings['isLTR'] ?? true);
-
+    await saveRenderingQuality(settings['renderingQuality'] ?? 2);
   }
 }

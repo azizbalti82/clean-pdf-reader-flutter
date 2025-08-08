@@ -6,7 +6,7 @@ class AppTheme {
       seedColor: Color(0xFF1B98FF),
       brightness: Brightness.light,
     ),
-    cardColor: Color(0xFF1B98FF).withOpacity(0.05),
+    cardColor: Color(0xFFEDF2F4),
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: AppBarTheme(color: Colors.white),
     useMaterial3: true,
@@ -18,7 +18,7 @@ class AppTheme {
       brightness: Brightness.dark,
     ),
     scaffoldBackgroundColor: Colors.black,
-    cardColor: Color(0xFF2B5670).withOpacity(0.1),
+    cardColor: Color(0xFF041D27),
     appBarTheme: AppBarTheme(color: Colors.black),
     useMaterial3: true,
   );

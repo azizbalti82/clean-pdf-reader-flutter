@@ -10,8 +10,10 @@ class SettingsProvider extends GetxController {
   RxBool isDark = false.obs;
   RxBool isYellow = false.obs;
   RxBool isLTR = false.obs;
+  RxInt renderingQuality = 2.obs;
 
-  void initSettings(bool isGrid,String sortBy,int colCount,bool isLTR,bool isYellow,bool isDark,bool isVertical,bool isContinuous) {
+
+  void initSettings(bool isGrid,String sortBy,int colCount,bool isLTR,bool isYellow,bool isDark,bool isVertical,bool isContinuous,int renderingQuality) {
     this.colCount.value = colCount;
     this.isGrid.value = isGrid;
     this.sortBy.value = sortBy;
@@ -20,7 +22,7 @@ class SettingsProvider extends GetxController {
     this.isDark.value = isDark;
     this.isVertical.value = isVertical;
     this.isContinuous.value = isContinuous;
-
+    this.renderingQuality.value = renderingQuality;
   }
   void updateIsGrid(bool isGrid) {
     this.isGrid.value = isGrid;
@@ -47,6 +49,7 @@ class SettingsProvider extends GetxController {
   void updateIsLTR(bool result) {
     isLTR.value = result;
   }
-
-
+  void updateRenderingQuality(int result) {
+    renderingQuality.value = result;
+  }
 }

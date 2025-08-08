@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -20,7 +21,7 @@ Future<List<String>> loadAllPdfFiles() async {
       }
     }
   } catch (e) {
-    print("Error loading PDF files: $e");
+    log("Error loading PDF files: $e");
   }
 
   // Remove duplicates by converting the list to a Set and back to a list
@@ -74,12 +75,12 @@ Future<void> searchDirectoryForPdfs(
         }
       } catch (e) {
         // Skip individual files that cause errors (permission issues, etc.)
-        print("Error processing file ${entity.path}: $e");
+        log("Error processing file ${entity.path}: $e");
         continue;
       }
     }
   } catch (e) {
-    print("Error searching directory ${directory.path}: $e");
+    log("Error searching directory ${directory.path}: $e");
     // Don't rethrow - let the function continue with other directories
   }
 }
@@ -102,7 +103,7 @@ Future<List<String>> loadAllPdfFilesOptimized() async {
       }
     }
   } catch (e) {
-    print("Error loading PDF files: $e");
+    log("Error loading PDF files: $e");
   }
 
   return pdfFiles.toList();

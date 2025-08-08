@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:pdfx/pdfx.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:pdfx/pdfx.dart';
 
 Future<Uint8List?> getPdfThumbnail(String pdfFilePath) async {
   try {
@@ -14,10 +14,12 @@ Future<Uint8List?> getPdfThumbnail(String pdfFilePath) async {
     final document = await PdfDocument.openFile(pdfFilePath);
     final page = await document.getPage(1);
 
+
     final pageImage = await page.render(
-      width: 600,
-      height: 900,
+      width: 300,
+      height: 450,
       format: PdfPageImageFormat.png,
+      backgroundColor: "white"
     );
 
     await page.close();

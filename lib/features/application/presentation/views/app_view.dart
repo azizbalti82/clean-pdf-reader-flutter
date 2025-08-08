@@ -1,19 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_fullscreen/flutter_fullscreen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pdf_reader/features/application/presentation/views/widgets/more_bottom_sheet_view.dart';
 import 'package:pdf_reader/main.dart';
+
 import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/services/settings_service.dart';
 import '../../../../core/utils/assets_data.dart';
 import '../../../../core/widgets/form.dart';
 import '../../../pdf listing/presentation/views/home_view.dart';
-import '../../../pdf preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 
 class AppView extends StatefulWidget {
   const AppView({super.key, required this.currentIndex});
@@ -199,7 +198,6 @@ class _AppViewState extends State<AppView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(width: 8),
-          if (currentIndex == 0)
             IconButton(
               onPressed: () {
                 showCupertinoModalBottomSheet(
