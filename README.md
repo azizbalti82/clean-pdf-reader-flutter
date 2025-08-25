@@ -1,6 +1,7 @@
-<img width="3264" height="918" alt="20250825_223241" src="https://github.com/user-attachments/assets/d02d7275-7775-45d6-8dab-076f798497da" />
+<img width="3264" height="918" alt="20250825_223241-min" src="https://github.com/user-attachments/assets/5ef503e6-f7ac-49a0-a99a-213f914a44eb" />
 
 ## 🔗 Table of Contents
+
 
 - [🌐 Release](#-live-preview)
 - [📍 Overview](#-overview)
