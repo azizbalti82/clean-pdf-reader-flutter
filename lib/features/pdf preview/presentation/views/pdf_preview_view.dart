@@ -81,24 +81,22 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _enableFullscreen());
     return Obx(() {
       theme = settingsProvider.isDark.value || settingsProvider.isYellow.value
           ? AppTheme.darkTheme
           : AppTheme.lightTheme;
       return Theme(
         data: theme,
-        child: Scaffold(
+        child: SafeArea(child:Scaffold(
           backgroundColor: theme.brightness==Brightness.light? Color(0xFFF4F8FA) : theme.colorScheme.background.withOpacity(0.6),
           body: GestureDetector(
-            onTap: _onScreenTap,
             child: Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               child: _buildPdfContent(),
             ),
           ),
-        ),
+        )),
       );
     });
   }
@@ -126,14 +124,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
       );
     }
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isOptionsShown = !isOptionsShown;
-        });
-        resetTimer();
-      },
-      child: Stack(
+    return Stack(
         children: [
           settingsProvider.isDark.value || settingsProvider.isYellow.value
               ? buildFilteredPDFViewer(
@@ -275,7 +266,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
             ),
           ),
         ],
-      ),
+
     );
   }
 
@@ -376,7 +367,8 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
               defaultPage: currentPage,
               enableSwipe: true,
               swipeHorizontal: !settingsProvider.isVertical.value,
-              autoSpacing: false,
+              autoSpacing: true,
+              fitPolicy: settingsProvider.isVertical.value? FitPolicy.WIDTH: FitPolicy.HEIGHT,
               pageFling: false,
               pageSnap: !settingsProvider.isContinuous.value,
               backgroundColor: Colors.white,
@@ -423,6 +415,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
           onTap: (){
             setState(() {
               isOptionsShown = !isOptionsShown;
+              FullScreen.setFullScreen(!isOptionsShown);
             });
             resetTimer();
           },
@@ -437,7 +430,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     );
   }
   Timer? _pageChangeDebouncer;
-  Timer? _precacheTimer;
 
   /// functions ----------------------------------------------------------------
   void goToPage(int pagesCount) async {
@@ -495,34 +487,20 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     final page = int.tryParse(input);
     return page != null && page >= 1 && page <= pagesCount;
   }
-
-
   void startTimer() {
     _timer = Timer(const Duration(seconds: 3), () {
       setState(() {
-        isOptionsShown = !isOptionsShown;
+        isOptionsShown = false;
       });
+      FullScreen.setFullScreen(true);
     });
   }
-
   void resetTimer() {
     _timer?.cancel();
     startTimer();
   }
-
   void _enableFullscreen() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  }
-
-  void _onScreenTap() {
-    if (FullScreen.isFullScreen) {
-      _autoFullscreenTimer?.cancel();
-      _autoFullscreenTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) _enableFullscreen();
-      });
-    } else {
-      _enableFullscreen();
-    }
+    FullScreen.setFullScreen(true);
   }
 }
 

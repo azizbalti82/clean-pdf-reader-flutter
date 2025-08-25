@@ -203,6 +203,7 @@ class _AppViewState extends State<AppView> {
                 showCupertinoModalBottomSheet(
                   topRadius: Radius.circular(25),
                   context: context,
+                  backgroundColor: Theme.of(context).canvasColor,
                   builder: (context) => MoreBottomSheetView(),
                 );
               },

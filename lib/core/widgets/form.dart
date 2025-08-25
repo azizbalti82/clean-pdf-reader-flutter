@@ -11,7 +11,7 @@ class CustomButtonOutline extends StatelessWidget {
   final bool isFullRow;
 
   const CustomButtonOutline({
-    Key? key,
+    super.key,
     required this.text,
     this.icon,
     this.isFullRow = true,
@@ -19,7 +19,7 @@ class CustomButtonOutline extends StatelessWidget {
     required this.onPressed,
     required this.isLoading,
     this.borderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,6 @@ class CustomButtonOutline extends StatelessWidget {
     )
         : _buildButton(context);
   }
-
   Widget _buildButton(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final outlineColor = borderColor ?? colorScheme.primary;
@@ -41,7 +40,6 @@ class CustomButtonOutline extends StatelessWidget {
       child: _buildButtonChild(outlineColor),
     );
   }
-
   // Extract button style to reduce object creation
   ButtonStyle _getButtonStyle(Color outlineColor) {
     return OutlinedButton.styleFrom(
@@ -78,10 +76,8 @@ class CustomButtonOutline extends StatelessWidget {
       ],
     );
   }
-
   List<Widget> _buildIconWidget(Color outlineColor) {
     if (icon == null) return [];
-
     return [
       SvgPicture.asset(
         "assets/icons/$icon.svg",

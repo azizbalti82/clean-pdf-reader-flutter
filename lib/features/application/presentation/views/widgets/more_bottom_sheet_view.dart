@@ -1,6 +1,8 @@
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 import '../../../../../core/provider/lists_provider.dart';
@@ -12,6 +14,205 @@ import '../../../../../main.dart';
 
 class MoreBottomSheetView extends StatelessWidget {
   MoreBottomSheetView({super.key});
+
+  final SettingsProvider settingsProvider = Get.put(SettingsProvider());
+  final PdfListsProvider pdfController = Get.put(PdfListsProvider());
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        children: [
+          const SizedBox(height: 4),
+          _buildHandle(colorScheme),
+          _buildContactSection(context),
+          SizedBox(height: 5,),
+          _buildVersionText(context),
+          const SizedBox(height: 5),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHandle(ColorScheme colorScheme) => Container(
+    width: 30,
+    height: 5,
+    decoration: BoxDecoration(
+      color: colorScheme.primary.withOpacity(0.2),
+      borderRadius: BorderRadius.circular(20),
+    ),
+  );
+
+  Widget _buildContactSection(BuildContext context) => _buildSection(
+    context: context,
+    title: "About App",
+    icon: Icons.info,
+    children: [
+      Row(
+        children: [
+          Expanded(child:_buildWebsiteButton(),),
+          const SizedBox(width: 10),
+          Expanded(child: _buildGithubButton()),
+        ],
+      ),
+      Row(
+        children: [
+          Expanded(child: _buildEmailButton()),
+          const SizedBox(width: 10),
+          Expanded(child:_buildRateButton(),),
+        ],
+      ),
+      _buildPrivacyButton(),
+    ],
+  );
+
+  Widget _buildEmailButton() => const CustomButtonOutline(
+    text: 'Email',
+    icon: "email",
+    isLoading: false,
+    onPressed: _launchEmail,
+  );
+
+  Widget _buildGithubButton() => const CustomButtonOutline(
+    text: 'Github',
+    icon: 'github',
+    isLoading: false,
+    onPressed: _launchGithub,
+  );
+
+  Widget _buildWebsiteButton() => const CustomButtonOutline(
+    text: 'Developer',
+    icon: 'public',
+    isLoading: false,
+    onPressed: _launchWebsite,
+  );
+
+  Widget _buildRateButton() => const CustomButtonOutline(
+    text: "Rate us",
+    icon: "stars",
+    isLoading: false,
+    onPressed: _launchRate,
+  );
+
+  Widget _buildPrivacyButton() => const CustomButtonOutline(
+    text: "Privacy policy",
+    icon: "privacy",
+    isLoading: false,
+    onPressed: _launchPrivacy,
+  );
+
+  Widget _buildVersionText(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      '${Constants.packageInfo?.version ?? ''}b${Constants.packageInfo?.buildNumber ?? ''}',
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+
+  Widget _buildSection(
+      {
+        required String title,
+        required IconData icon,
+        String? content,
+        List<Widget>? children,
+        bool isVertical = true,
+        required BuildContext context
+      })
+  {
+    final theme = Theme.of(context ?? Get.context!);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    final items = [
+      if (content != null)
+        Text(
+          content,
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
+      if (children != null) ...children,
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: colorScheme.onSurface, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              Spacer(),
+              IconButton(onPressed: () => showCupertinoModalBottomSheet(
+    topRadius: const Radius.circular(25),
+    context: context,
+    backgroundColor: Theme.of(context).canvasColor,
+    builder: (context) => MoreBottomSettingsSheetView(),
+    ),icon: SvgPicture.asset(
+                "assets/icons/settings.svg",
+                width: 25,
+                color: colorScheme.onSurface, // textColor equivalent
+              ),)
+            ],
+          ),
+          const SizedBox(height: 10),
+          isVertical
+              ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: items
+                .map((item) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: item,
+            ))
+                .toList(),
+          )
+              : Row(
+            children: items
+                .map((item) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: item,
+              ),
+            ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🔹 Extracted static launch methods (so buttons can be const)
+  static void _launchEmail() => EasyLauncher.url(
+    url: 'mailto:baltcode.app@gmail.com?subject=${Uri.encodeComponent('App watchy contact')}',
+  );
+
+  static void _launchGithub() => EasyLauncher.url(url: "https://github.com/azizbalti82/modern-pdf-reader-for-android");
+
+  static void _launchWebsite() =>
+      EasyLauncher.url(url: "https://azizbalti.netlify.app");
+
+  static void _launchRate() => EasyLauncher.url(
+    url: "https://play.google.com/store/apps/details?id=com.baltcode.watchy",
+  );
+
+  static void _launchPrivacy() => EasyLauncher.url(
+    url: "https://azizbalti.netlify.app/projects/privacy/mypdf",
+  );
+}
+
+class MoreBottomSettingsSheetView extends StatelessWidget {
+  MoreBottomSettingsSheetView({super.key});
 
   final SettingsProvider settingsProvider = Get.put(SettingsProvider());
   final PdfListsProvider pdfController = Get.put(PdfListsProvider());
@@ -42,9 +243,6 @@ class MoreBottomSheetView extends StatelessWidget {
           _buildHandle(colorScheme),
           const SizedBox(height: 10),
           _buildSettingsSection(context),
-          _buildContactSection(),
-          _buildVersionText(context),
-
           const SizedBox(height: 10),
         ],
       ),
@@ -123,72 +321,6 @@ class MoreBottomSheetView extends StatelessWidget {
       isLoading: false,
       isFullRow: false,
       onPressed: showMenu,
-    ),
-  );
-
-  Widget _buildContactSection() => _buildSection(
-    null,
-    title: "About App",
-    icon: Icons.info,
-    children: [
-      Row(
-        children: [
-          Expanded(child: _buildEmailButton()),
-          const SizedBox(width: 10),
-          Expanded(child: _buildGithubButton()),
-        ],
-      ),
-      _buildWebsiteButton(),
-      _buildRateButton(),
-      _buildPrivacyButton(),
-    ],
-  );
-
-  Widget _buildEmailButton() => CustomButtonOutline(
-    text: 'Email',
-    icon: "email",
-    isLoading: false,
-    onPressed: () => EasyLauncher.url(
-      url: 'mailto:baltcode.app@gmail.com?subject=${Uri.encodeComponent('App watchy contact')}',
-    ),
-  );
-
-  Widget _buildGithubButton() => CustomButtonOutline(
-    text: 'Github',
-    icon: 'github',
-    isLoading: false,
-    onPressed: () => EasyLauncher.url(url: ""),
-  );
-
-  Widget _buildWebsiteButton() => CustomButtonOutline(
-    text: 'Developer Website',
-    icon: 'public',
-    isLoading: false,
-    onPressed: () => EasyLauncher.url(url: "https://azizbalti.netlify.app"),
-  );
-
-  Widget _buildRateButton() => CustomButtonOutline(
-    text: "Rate us",
-    icon: "stars",
-    isLoading: false,
-    onPressed: () => EasyLauncher.url(
-      url: "https://play.google.com/store/apps/details?id=com.baltcode.watchy",
-    ),
-  );
-
-  Widget _buildPrivacyButton() => CustomButtonOutline(
-    text: "Privacy policy",
-    icon: "privacy",
-    isLoading: false,
-    onPressed: () => EasyLauncher.url(
-      url: "https://azizbalti.netlify.app/projects/mypdf/privacy.html",
-    ),
-  );
-
-  Widget _buildVersionText(BuildContext context) => Text(
-    '${Constants.packageInfo?.version ?? ''}b${Constants.packageInfo?.buildNumber ?? ''}',
-    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
     ),
   );
 

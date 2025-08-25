@@ -287,20 +287,31 @@ class PdfItem extends StatefulWidget {
 }
 class _PdfItemState extends State<PdfItem> with AutomaticKeepAliveClientMixin {
   Future<Uint8List?>? _thumbnailFuture;
-  String? _currentPath;
 
   @override
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+    _loadThumbnail();
+  }
+
+  @override
+  void didUpdateWidget(covariant PdfItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.filePath != widget.filePath) {
+      _loadThumbnail();
+    }
+  }
+
+  void _loadThumbnail() {
+    _thumbnailFuture = getPdfThumbnailCached(widget.filePath);
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    // Reset future if path changed
-    if (_currentPath != widget.filePath) {
-      _thumbnailFuture = null;
-      _currentPath = widget.filePath;
-    }
 
     return GestureDetector(
       onTap: () {
@@ -308,9 +319,12 @@ class _PdfItemState extends State<PdfItem> with AutomaticKeepAliveClientMixin {
       },
       onLongPress: () {
         showCupertinoModalBottomSheet(
-          topRadius: Radius.circular(25),
+          topRadius: const Radius.circular(25),
           context: context,
-          builder: (context) => PdfOptionsBottomSheetView(path: widget.filePath, fromPreview: false),
+          builder: (context) => PdfOptionsBottomSheetView(
+            path: widget.filePath,
+            fromPreview: false,
+          ),
         );
       },
       child: Container(
@@ -338,50 +352,23 @@ class _PdfItemState extends State<PdfItem> with AutomaticKeepAliveClientMixin {
                   topRight: Radius.circular(20),
                 ),
                 child: Container(
-                    color: Theme.of(context).colorScheme.background.withOpacity(0.9),
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: FutureBuilder<Uint8List?>(
-                      future: _thumbnailFuture ??= getPdfThumbnailCached(widget.filePath), // Create once and cache
-                      builder: (context, snapshot) {
-                        // If data is available, display the image
-                        if (snapshot.hasData && snapshot.data != null) {
-                          return Image.memory(
-                            snapshot.data!,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Center(
-                                child: Icon(
-                                  Icons.picture_as_pdf,
-                                  size: 40,
-                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
-                                ),
-                              );
-                            },
-                          );
-                        }
-
-                        // If the data is loading, show the shimmer animation
-                        return Shimmer.fromColors(
-                          baseColor: Theme.of(context).cardColor,
-                          highlightColor: Theme.of(context).colorScheme.surface.withOpacity(0.15),
-                          enabled: snapshot.connectionState == ConnectionState.waiting,
-                          child: Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            color: Theme.of(context).colorScheme.background,
-                          ),
-                        );
-                      },
-                    )
+                  color: Theme.of(context)
+                      .colorScheme
+                      .background
+                      .withOpacity(0.9),
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: _thumbnailFuture != null
+                      ? getPdfThumbnailCachedExist(
+                      widget.filePath, _thumbnailFuture!)
+                      : const Center(child: CircularProgressIndicator()),
                 ),
               ),
             ),
             // File info section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -398,10 +385,14 @@ class _PdfItemState extends State<PdfItem> with AutomaticKeepAliveClientMixin {
                   ),
                   if (widget.isRecent)
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 3, horizontal: 7),
-                      margin: EdgeInsets.symmetric(vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 3, horizontal: 7),
+                      margin: const EdgeInsets.symmetric(vertical: 2),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
