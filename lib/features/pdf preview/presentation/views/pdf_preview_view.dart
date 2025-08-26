@@ -13,12 +13,14 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path_ob;
+import 'package:pdf_reader/core/utils/tools.dart';
 import 'package:pdf_reader/core/widgets/toasts.dart';
 import 'package:pdf_reader/features/pdf%20preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 
 import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/provider/settings_provider.dart';
 import '../../../../core/utils/theme_data.dart';
+import '../../../../core/widgets/basics.dart';
 import '../../../pdf listing/models/pdf.dart';
 import '../../../pdf listing/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
 import '../../../pdf listing/services/pdf_service.dart';
@@ -32,9 +34,9 @@ class PdfPreviewView extends StatefulWidget {
 
 class _PdfPreviewViewState extends State<PdfPreviewView>
     with WidgetsBindingObserver {
+  final Completer<PDFViewController> pdfCtrl = Completer<PDFViewController>();
   late PdfListsProvider pdfController;
   late SettingsProvider settingsProvider;
-
   late String pdfPath;
   Timer? _autoFullscreenTimer;
   bool isLoading = true;
@@ -46,7 +48,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   late ThemeData theme;
   ScrollController? _scrollController;
   Timer? _debounceTimer;
-
+  late bool isVertical;
 
   @override
   void initState() {
@@ -55,6 +57,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     _scrollController = ScrollController();
     pdfController = Get.put(PdfListsProvider());
     settingsProvider = Get.put(SettingsProvider());
+    isVertical = settingsProvider.isVertical.value;
 
     WidgetsBinding.instance.addObserver(this);
     resetTimer();
@@ -82,21 +85,42 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      theme = settingsProvider.isDark.value || settingsProvider.isYellow.value
+      if (isVertical != settingsProvider.isVertical.value) {
+        // Update the local state first
+        isVertical = settingsProvider.isVertical.value;
+
+        // Schedule screen replacement after this frame
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PdfPreviewView(pdfPath: pdfPath,),
+            ),
+          );
+        });
+      }
+
+      statusBarPreviewSetup();
+      theme = settingsProvider.isDark.value
           ? AppTheme.darkTheme
           : AppTheme.lightTheme;
       return Theme(
         data: theme,
-        child: SafeArea(child:Scaffold(
-          backgroundColor: theme.brightness==Brightness.light? Color(0xFFF4F8FA) : theme.colorScheme.background.withOpacity(0.6),
-          body: GestureDetector(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: _buildPdfContent(),
+        child: SafeArea(
+          child: Scaffold(
+            backgroundColor: theme.brightness == Brightness.light
+                ? Color(0xFFF4F8FA)
+                : theme.colorScheme.background.withOpacity(0.6),
+            body: GestureDetector(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: _buildPdfContent(),
+              ),
             ),
           ),
-        )),
+        ),
       );
     });
   }
@@ -125,148 +149,169 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     }
 
     return Stack(
-        children: [
-          settingsProvider.isDark.value || settingsProvider.isYellow.value
-              ? buildFilteredPDFViewer(
-                  settingsProvider.isDark.value ? "dark" : "yellow",
-                )
-              :SizedBox(
-            width: double.infinity,
-            child: SizedBox.expand( // This makes the child take all available space
-              child: pdfViewer(), // Your PDF viewer widget
-            ),
-          ),
-          AnimatedPositioned(
+      children: [
+        settingsProvider.isDark.value || settingsProvider.isYellow.value
+            ? buildFilteredPDFViewer(
+                settingsProvider.isDark.value ? "dark" : "yellow",
+              )
+            : SizedBox(
+                width: double.infinity,
+                child: SizedBox.expand(
+                  child: pdfViewer(),
+                ),
+              ),
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+          top: isOptionsShown ? 0 : -100,
+          left: 10,
+          right: 10,
+          child: AnimatedOpacity(
+            opacity: isOptionsShown ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 500),
             curve: Curves.easeInOut,
-            top: isOptionsShown ? 0 : -100,
-            left: 10,
-            right: 10,
-            child: AnimatedOpacity(
-              opacity: isOptionsShown ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeInOut,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 10,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 10,
+                ),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withOpacity(0.4),
+                    width: 0.5,
                   ),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: theme.colorScheme.primary.withOpacity(0.4),
-                      width: 0.5,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: theme.colorScheme.onBackground.withOpacity(0.8),
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: theme.colorScheme.onBackground.withOpacity(
-                            0.8,
-                          ),
+                    Expanded(
+                      child: Text(
+                        path_ob.basenameWithoutExtension(pdfPath),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      Expanded(
-                        child: Text(
-                          path_ob.basenameWithoutExtension(pdfPath),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        showCupertinoModalBottomSheet(
+                          topRadius: const Radius.circular(25),
+                          context: context,
+                          builder: (context) {
+                            FullScreen.setFullScreen(true);
+                            return PdfPreviewOptionsBottomSheetView();
+                          },
+                        );
+                      },
+                      icon: SvgPicture.asset(
+                        "assets/icons/parameter.svg",
+                        width: 22,
+                        color: theme.colorScheme.onBackground.withOpacity(0.8),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          showCupertinoModalBottomSheet(
-                            topRadius: const Radius.circular(25),
-                            context: context,
-                            builder: (context) =>
-                                PdfPreviewOptionsBottomSheetView(),
-                          );
-                        },
-                        icon: SvgPicture.asset(
-                          "assets/icons/parameter.svg",
-                          width: 22,
-                          color: theme.colorScheme.onBackground.withOpacity(
-                            0.8,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          showCupertinoModalBottomSheet(
-                            topRadius: const Radius.circular(25),
-                            context: context,
-                            builder: (context) => PdfOptionsBottomSheetView(
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        showCupertinoModalBottomSheet(
+                          topRadius: const Radius.circular(25),
+                          context: context,
+                          builder: (context) {
+                            FullScreen.setFullScreen(true);
+                            return PdfOptionsBottomSheetView(
                               path: pdfPath,
                               fromPreview: true,
-                            ),
-                          );
-                        },
-                        icon: Icon(
-                          Icons.more_vert_rounded,
-                          color: theme.colorScheme.onBackground.withOpacity(
-                            0.8,
-                          ),
-                        ),
+                            );
+                          },
+                        );
+                      },
+                      icon: Icon(
+                        Icons.more_vert_rounded,
+                        color: theme.colorScheme.onBackground.withOpacity(0.8),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-            bottom: isOptionsShown ? 0 : -100,
-            left: 10,
-            right: 10,
-            child: AnimatedOpacity(
-              opacity: isOptionsShown ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeInOut,
-              child: Align(
-                alignment: Alignment.center,
-                child: InkWell(
-                  onTap: (){
-                    goToPage(pagesNumber);
-                  },
-                  child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 5,
-                    horizontal: 10,
-                  ),
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 40,
-                    horizontal: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: theme.colorScheme.primary.withOpacity(0.4),
-                      width: 0.5,
-                    ),
-                  ),
-                  child: Text("$currentPage / $pagesNumber"),
-                ),
-              )),
-            ),
-          ),
-        ],
+        ),
+        FutureBuilder(
+          future: pdfCtrl.future,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return FutureBuilder<int?>(
+                future: snapshot.data?.getPageCount(),
+                builder: (context, countSnapshot) {
+                  if (countSnapshot.hasData) {
+                    int count = countSnapshot.data ?? 1;
 
+                    return AnimatedPositioned(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                      bottom: isOptionsShown ? 0 : -100,
+                      left: 10,
+                      right: 10,
+                      child: AnimatedOpacity(
+                        opacity: isOptionsShown ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: InkWell(
+                            onTap: () {
+                              goToPage();
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 5,
+                                horizontal: 10,
+                              ),
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 40,
+                                horizontal: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withOpacity(
+                                    0.4,
+                                  ),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Text("${currentPage+1} / $count"),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  } else {
+                    return const SizedBox(); // loading or empty
+                  }
+                },
+              );
+            } else {
+              return const SizedBox(); // still waiting pdfCtrl.future
+            }
+          },
+        ),
+      ],
     );
   }
 
@@ -359,60 +404,54 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     return Stack(
       children: [
         Directionality(
-          textDirection: !settingsProvider.isLTR.value && !settingsProvider.isVertical.value
-              ? TextDirection.rtl
-              : TextDirection.ltr,
-          child:PDFView(
-              filePath: pdfPath,
-              defaultPage: currentPage,
-              enableSwipe: true,
-              swipeHorizontal: !settingsProvider.isVertical.value,
-              autoSpacing: true,
-              fitPolicy: settingsProvider.isVertical.value? FitPolicy.WIDTH: FitPolicy.HEIGHT,
-              pageFling: false,
-              pageSnap: !settingsProvider.isContinuous.value,
-              backgroundColor: Colors.white,
-              onError: (error) {
-                if (mounted) {
-                  // Handle error - maybe show a retry button
-                  print('PDF load failed: ${error.toString()}');
-                }
-              },
-              onPageError: (page, error) {
-                if (mounted) {
-                  // Handle error - maybe show a retry button
-                  print('page $page load failed: $error');
-                }
-              },
-              onPageChanged: (page,total) {
-                // Use more aggressive debouncing to reduce state updates
-                _pageChangeDebouncer?.cancel();
-                _pageChangeDebouncer = Timer(const Duration(milliseconds: 300), () {
-                  if (mounted && currentPage != page!) {
-                    setState(() {
-                      currentPage = page;
-                    });
-                    addToRecent(updateCurrentPage: true);
-                  }
-                });
-              },
-              onViewCreated: (c) async{
-                if (mounted) {
-                  pagesNumber = (await c.getPageCount())!;
-                  setState(() {
-                  });
-
-                  // Pre-cache adjacent pages for smoother scrolling
-                  // _precacheAdjacentPages();
-                }
-              },
-            ),
+          textDirection:
+              settingsProvider.isLTR.value && !settingsProvider.isVertical.value
+              ? TextDirection.ltr
+              : TextDirection.rtl,
+          child: PDFView(
+            filePath: pdfPath,
+            defaultPage: currentPage,
+            enableSwipe: true,
+            swipeHorizontal:!settingsProvider.isVertical.value,
+            autoSpacing: true,
+            fitPolicy: settingsProvider.isVertical.value
+                ? FitPolicy.WIDTH
+                : FitPolicy.HEIGHT,
+            pageFling: false,
+            pageSnap: !settingsProvider.isContinuous.value,
+            backgroundColor: Colors.white,
+            onError: (error) {
+              if (mounted) {
+                // Handle error - maybe show a retry button
+                print('PDF load failed: ${error.toString()}');
+              }
+            },
+            onPageError: (page, error) {
+              if (mounted) {
+                // Handle error - maybe show a retry button
+                print('page $page load failed: $error');
+              }
+            },
+            onPageChanged: (page, total) {
+              setState(() {
+                currentPage = page ?? 1;
+              });
+              addToRecent(updateCurrentPage: true);
+            },
+            onViewCreated: (PDFViewController pdfViewController) async {
+              //pdfCtrl.complete(pdfViewController);
+              if (!pdfCtrl.isCompleted) {
+                pdfCtrl.complete(pdfViewController);
+              }
+            },
+          ),
         ),
 
         GestureDetector(
-          behavior: HitTestBehavior.translucent, //to listen for tap events on an empty container
+          behavior: HitTestBehavior
+              .translucent, //to listen for tap events on an empty container
 
-          onTap: (){
+          onTap: () {
             setState(() {
               isOptionsShown = !isOptionsShown;
               FullScreen.setFullScreen(!isOptionsShown);
@@ -424,18 +463,19 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
           ),
-        )
-
+        ),
       ],
     );
   }
+
   Timer? _pageChangeDebouncer;
 
   /// functions ----------------------------------------------------------------
-  void goToPage(int pagesCount) async {
+  void goToPage() async {
     try {
-      final controller = TextEditingController(text: currentPage.toString());
-
+      final controller = TextEditingController(text: (currentPage+1).toString());
+      var _controller = await pdfCtrl.future;
+      int count = await _controller.getPageCount() ?? 1;
       final newValue = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
@@ -450,21 +490,25 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
             ],
             decoration: InputDecoration(
               hintText: 'Enter page number',
-              errorText: _isValidInput(controller.text, pagesCount) ? null : 'Invalid page number',
+              errorText: _isValidInput(controller.text, count)
+                  ? null
+                  : 'Invalid page number',
             ),
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cancel')
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 final input = controller.text.trim();
-                if (_isValidInput(input, pagesCount)) {
+                if (_isValidInput(input, count)) {
                   Navigator.pop(context, input);
-                }else{
-                  Toast.showError("Enter a number from 1 to $pagesCount", context);
+                  _controller.setPage(int.parse(input)-1);
+                  setState(() {});
+                } else {
+                  Toast.showError("Enter a number from 1 to $count", context);
                 }
               },
               child: Text('Go'),
@@ -482,11 +526,12 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     }
   }
 
-// Helper method to check if input is valid
+  // Helper method to check if input is valid
   bool _isValidInput(String input, int pagesCount) {
     final page = int.tryParse(input);
     return page != null && page >= 1 && page <= pagesCount;
   }
+
   void startTimer() {
     _timer = Timer(const Duration(seconds: 3), () {
       setState(() {
@@ -495,12 +540,13 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
       FullScreen.setFullScreen(true);
     });
   }
+
   void resetTimer() {
     _timer?.cancel();
     startTimer();
   }
+
   void _enableFullscreen() {
     FullScreen.setFullScreen(true);
   }
 }
-

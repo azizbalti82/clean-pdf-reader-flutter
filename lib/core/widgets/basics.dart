@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -410,6 +411,40 @@ class _PdfItemState extends State<PdfItem> with AutomaticKeepAliveClientMixin {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+statusBarPreviewSetup(){
+  // set system bars style based on theme
+  if (settingsProvider.isDark.value) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.black,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+    );
+  } else if (settingsProvider.isYellow.value) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.yellow.shade50,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.yellow.shade50,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+  } else {
+    // Light mode
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
     );
   }

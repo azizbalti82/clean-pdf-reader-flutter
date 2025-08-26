@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path_ob;
@@ -8,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../../core/provider/settings_provider.dart';
 import '../../../../../core/services/settings_service.dart';
+import '../../../../../core/widgets/basics.dart';
 import '../../../../../main.dart';
 
 
@@ -21,7 +23,9 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
     return Material(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical:12,horizontal: 30 ),
-        child: Obx(() { return Column(
+        child: Obx(() {
+          statusBarPreviewSetup();
+          return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 4),
@@ -53,8 +57,10 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                 }),
               ],
             ),
+            /*
             if(!settingsProvider.isVertical.value)
               const SizedBox(height: 20),
+
             if(!settingsProvider.isVertical.value)
               Text("Reading Direction",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
             if(!settingsProvider.isVertical.value)
@@ -74,7 +80,11 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                 }),
               ],
             ),
+
+*/
             const SizedBox(height: 20),
+
+
             Text("Page Transition",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
             const SizedBox(height: 20),
             Row(
@@ -97,7 +107,7 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                selectableItem("Default",!settingsProvider.isDark.value && !settingsProvider.isYellow.value,context,(){
+                selectableItem("Light",!settingsProvider.isDark.value && !settingsProvider.isYellow.value,context,(){
                   SettingsService.saveIsDark(false);
                   settingsProvider.updateIsDark(false);
                   SettingsService.saveIsYellow(false);
@@ -119,41 +129,6 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                 }),
               ],
             ),
-            /*
-            const SizedBox(height: 20),
-            Text("Pages Quality",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                selectableItem("1x",settingsProvider.renderingQuality.value==1,context,(){
-                  SettingsService.saveRenderingQuality(1);
-                  settingsProvider.updateRenderingQuality(1);
-                }),
-                SizedBox(width: 12,),
-                selectableItem("2x",settingsProvider.renderingQuality.value==2,context,(){
-                  SettingsService.saveRenderingQuality(2);
-                  settingsProvider.updateRenderingQuality(2);
-                }),
-                SizedBox(width: 12,),
-                selectableItem("3x",settingsProvider.renderingQuality.value==3,context,(){
-                  SettingsService.saveRenderingQuality(3);
-                  settingsProvider.updateRenderingQuality(3);
-                }),
-                SizedBox(width: 12,),
-                selectableItem("4x",settingsProvider.renderingQuality.value==4,context,(){
-                  SettingsService.saveRenderingQuality(4);
-                  settingsProvider.updateRenderingQuality(4);
-                }),
-                SizedBox(width: 12,),
-                selectableItem("5x",settingsProvider.renderingQuality.value==5,context,(){
-                  SettingsService.saveRenderingQuality(5);
-                  settingsProvider.updateRenderingQuality(5);
-                }),
-              ],
-            ),
-
-             */
             const SizedBox(height: 20),
           ],
         );}),
