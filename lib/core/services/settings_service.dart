@@ -88,6 +88,14 @@ class SettingsService {
     return (await _prefs).getInt('rendering_quality') ?? 2;
   }
 
+  static Future<void> saveBgColor(String value) async {
+    (await _prefs).setString('bg_color', value);
+  }
+
+  static Future<String> getBgColor() async {
+    return (await _prefs).getString('bg_color') ?? 'follow';
+  }
+
   // Retrieve all settings
   static Future<Map<String, dynamic>> getAllSettings() async {
     return {
@@ -100,7 +108,7 @@ class SettingsService {
       'isYellow': await getIsYellow(),
       'isLTR': await getIsLTR(),
       'renderingQuality': await getRenderingQuality(),
-
+      'bgColor':await getBgColor(),
     };
   }
 
@@ -115,5 +123,6 @@ class SettingsService {
     await saveIsYellow(settings['isYellow'] ?? false);
     await saveIsYellow(settings['isLTR'] ?? true);
     await saveRenderingQuality(settings['renderingQuality'] ?? 2);
+    await saveBgColor(settings['bgColor'] ?? "follow");
   }
 }

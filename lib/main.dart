@@ -26,10 +26,11 @@ Future<void> loadSettings() async {
   bool isVertical = await SettingsService.getIsVertical();
   bool isContinuous = await SettingsService.getIsContinuous();
   int renderingQuality = await SettingsService.getRenderingQuality();
+  String bgColor = await SettingsService.getBgColor();
 
 
   final SettingsProvider settingsProvider = Get.put(SettingsProvider());
-  settingsProvider.initSettings(isGrid,sortType,gridCount,isLTR,isYellow,isDark,isVertical,isContinuous,renderingQuality);
+  settingsProvider.initSettings(isGrid,sortType,gridCount,isLTR,isYellow,isDark,isVertical,isContinuous,renderingQuality,bgColor);
 }
 
 void loadPDFs() async {

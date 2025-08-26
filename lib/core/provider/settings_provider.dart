@@ -4,6 +4,7 @@ class SettingsProvider extends GetxController {
   RxBool isGrid = false.obs; // homePDF
   RxInt colCount = 0.obs; // bookmarkPDF
   RxString sortBy = ''.obs; // recentPDF
+  RxString bgColor = 'follow'.obs; // recentPDF
   /// preview preferences
   RxBool isVertical = true.obs; //false means "horizontal"
   RxBool isContinuous = true.obs; //false means "jump"
@@ -13,7 +14,7 @@ class SettingsProvider extends GetxController {
   RxInt renderingQuality = 2.obs;
 
 
-  void initSettings(bool isGrid,String sortBy,int colCount,bool isLTR,bool isYellow,bool isDark,bool isVertical,bool isContinuous,int renderingQuality) {
+  void initSettings(bool isGrid,String sortBy,int colCount,bool isLTR,bool isYellow,bool isDark,bool isVertical,bool isContinuous,int renderingQuality,String bgColor) {
     this.colCount.value = colCount;
     this.isGrid.value = isGrid;
     this.sortBy.value = sortBy;
@@ -23,6 +24,7 @@ class SettingsProvider extends GetxController {
     this.isVertical.value = isVertical;
     this.isContinuous.value = isContinuous;
     this.renderingQuality.value = renderingQuality;
+    this.bgColor.value = bgColor;
   }
   void updateIsGrid(bool isGrid) {
     this.isGrid.value = isGrid;
@@ -51,5 +53,8 @@ class SettingsProvider extends GetxController {
   }
   void updateRenderingQuality(int result) {
     renderingQuality.value = result;
+  }
+  void updateBgColor(String result) {
+    bgColor.value = result;
   }
 }

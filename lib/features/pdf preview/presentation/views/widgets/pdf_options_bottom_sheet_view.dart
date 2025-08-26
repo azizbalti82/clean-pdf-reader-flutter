@@ -102,7 +102,8 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            Text("Theme",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
+            //pdf theme
+            Text("Pdf Filter",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -126,6 +127,29 @@ class PdfPreviewOptionsBottomSheetView extends StatelessWidget {
                   settingsProvider.updateIsYellow(true);
                   SettingsService.saveIsDark(false);
                   settingsProvider.updateIsDark(false);
+                }),
+              ],
+            ),
+            const SizedBox(height: 20),
+            //pdf theme
+            Text("Background",style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16)),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                selectableItem("Follow Pdf Filter",settingsProvider.bgColor.value=="follow",context,(){
+                  SettingsService.saveBgColor("follow");
+                  settingsProvider.updateBgColor("follow");
+                }),
+                SizedBox(width: 12,),
+                selectableItem("Light",settingsProvider.bgColor.value=="light",context,(){
+                  SettingsService.saveBgColor("light");
+                  settingsProvider.updateBgColor("light");
+                }),
+                SizedBox(width: 12,),
+                selectableItem("Dark",settingsProvider.bgColor.value=="dark",context,(){
+                  SettingsService.saveBgColor("dark");
+                  settingsProvider.updateBgColor("dark");
                 }),
               ],
             ),

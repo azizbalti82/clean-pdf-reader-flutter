@@ -418,34 +418,49 @@ class _PdfItemState extends State<PdfItem> with AutomaticKeepAliveClientMixin {
 
 
 statusBarPreviewSetup(){
-  // set system bars style based on theme
-  if (settingsProvider.isDark.value) {
-    SystemChrome.setSystemUIOverlayStyle(
+  Color c = getSpaceColor(isReal: true);
+  Brightness b = ThemeData.estimateBrightnessForColor(c);
+// Invert brightness
+  b = b == Brightness.dark ? Brightness.light : Brightness.dark;
+  SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: Colors.black,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: Colors.black,
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarColor:c,
+        statusBarIconBrightness: b,
+        systemNavigationBarColor: c,
+        systemNavigationBarIconBrightness: b,
       ),
     );
-  } else if (settingsProvider.isYellow.value) {
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.yellow.shade50,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.yellow.shade50,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-    );
-  } else {
-    // Light mode
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-    );
+}
+
+Color getSpaceColor({required bool isReal}) {
+  print(settingsProvider.bgColor.value);
+
+  switch (settingsProvider.bgColor.value) {
+    case "light":
+      return settingsProvider.isDark.value
+          ? (isReal) ? Color(0xFFEDF1F1) : Color(0xFF120E0E)
+          : !settingsProvider.isDark.value && settingsProvider.isYellow.value
+          ? (isReal) ? Color(0xFFF1F0EB) : Color(0x59FFFEF1)
+          : Color(0xFFEDF1F1);
+
+      return isReal ? Color(0xFFEDF1F1) : Color(0xFF120E0E);
+    case "dark":
+      return settingsProvider.isDark.value
+          ? (isReal) ? Color(0xFF222625) : Color(0xFFDDD9DA)
+          : !settingsProvider.isDark.value && settingsProvider.isYellow.value
+          ? (isReal) ? Color(0xFF1B180E) : Color(0xFF221601)
+          : Color(0xFF1C1C1C);
+    default:
+      if (settingsProvider.isDark.value) {
+        return isReal ? Color(0xFF222625) : Color(0xFFDDD9DA);
+      } else if (settingsProvider.isYellow.value) {
+        return isReal ? Color(0xFF1B180E) : Color(0xFF3E2801);
+      } else {
+        return settingsProvider.isDark.value
+            ? (isReal) ? Color(0xFF222625) : Color(0xFFDDD9DA)
+            : !settingsProvider.isDark.value && settingsProvider.isYellow.value
+            ? (isReal) ? Color(0xFF1B180E) : Color(0xFF3E2801)
+            : Color(0xFFEDF1F1);
+      }
   }
 }

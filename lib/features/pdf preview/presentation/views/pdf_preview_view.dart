@@ -49,6 +49,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   ScrollController? _scrollController;
   Timer? _debounceTimer;
   late bool isVertical;
+  late String bgColor;
 
   @override
   void initState() {
@@ -58,6 +59,8 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     pdfController = Get.put(PdfListsProvider());
     settingsProvider = Get.put(SettingsProvider());
     isVertical = settingsProvider.isVertical.value;
+    bgColor = settingsProvider.bgColor.value;
+
 
     WidgetsBinding.instance.addObserver(this);
     resetTimer();
@@ -68,7 +71,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     } catch (e) {
       currentPage = 1;
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) => _enableFullscreen());
     addToRecent();
   }
 
@@ -85,9 +87,9 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (isVertical != settingsProvider.isVertical.value) {
-        // Update the local state first
+      if (isVertical != settingsProvider.isVertical.value || bgColor != settingsProvider.bgColor.value) {
         isVertical = settingsProvider.isVertical.value;
+        bgColor = settingsProvider.bgColor.value;
 
         // Schedule screen replacement after this frame
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -413,13 +415,13 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
             defaultPage: currentPage,
             enableSwipe: true,
             swipeHorizontal:!settingsProvider.isVertical.value,
-            autoSpacing: true,
+            autoSpacing: !settingsProvider.isContinuous.value,
             fitPolicy: settingsProvider.isVertical.value
                 ? FitPolicy.WIDTH
                 : FitPolicy.HEIGHT,
             pageFling: false,
             pageSnap: !settingsProvider.isContinuous.value,
-            backgroundColor: Colors.white,
+            backgroundColor: getSpaceColor(isReal: false),
             onError: (error) {
               if (mounted) {
                 // Handle error - maybe show a retry button
@@ -467,8 +469,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
       ],
     );
   }
-
-  Timer? _pageChangeDebouncer;
 
   /// functions ----------------------------------------------------------------
   void goToPage() async {
@@ -544,9 +544,5 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   void resetTimer() {
     _timer?.cancel();
     startTimer();
-  }
-
-  void _enableFullscreen() {
-    FullScreen.setFullScreen(true);
   }
 }
