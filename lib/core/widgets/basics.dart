@@ -6,7 +6,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path;
-import 'package:shimmer/shimmer.dart';
 
 import '../../features/pdf listing/models/pdf.dart';
 import '../../features/pdf listing/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
