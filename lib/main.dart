@@ -41,7 +41,6 @@ void loadPDFs() async {
     List<String> bookmarksPdfs = pdfFiles.where((p)=> hivePdfs.where((m)=>m.isBookmark).map((m)=>m.path).contains(p)).toList();
     List<Pdf> recentPdfs = hivePdfs.where((m)=>m.isOpened && pdfFiles.contains(m.path)).toList();
 
-
     //init lists
     final PdfListsProvider pdfController = Get.put(PdfListsProvider());
     final SettingsProvider settingsProvider = Get.put(SettingsProvider());
@@ -58,6 +57,8 @@ void loadPDFs() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await requestAllFilesAccess();
   //hive
   await Hive.initFlutter();
   Hive.registerAdapter(PdfAdapter());

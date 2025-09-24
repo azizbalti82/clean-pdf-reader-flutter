@@ -30,7 +30,7 @@ class MoreBottomSheetView extends StatelessWidget {
           const SizedBox(height: 4),
           _buildHandle(colorScheme),
           _buildContactSection(context),
-          SizedBox(height: 5,),
+          SizedBox(height: 5),
           _buildVersionText(context),
           const SizedBox(height: 5),
         ],
@@ -54,7 +54,7 @@ class MoreBottomSheetView extends StatelessWidget {
     children: [
       Row(
         children: [
-          Expanded(child:_buildWebsiteButton(),),
+          Expanded(child: _buildWebsiteButton()),
           const SizedBox(width: 10),
           Expanded(child: _buildGithubButton()),
         ],
@@ -63,7 +63,7 @@ class MoreBottomSheetView extends StatelessWidget {
         children: [
           Expanded(child: _buildEmailButton()),
           const SizedBox(width: 10),
-          Expanded(child:_buildRateButton(),),
+          Expanded(child: _buildRateButton()),
         ],
       ),
       _buildPrivacyButton(),
@@ -115,16 +115,14 @@ class MoreBottomSheetView extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(
-      {
-        required String title,
-        required IconData icon,
-        String? content,
-        List<Widget>? children,
-        bool isVertical = true,
-        required BuildContext context
-      })
-  {
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    String? content,
+    List<Widget>? children,
+    bool isVertical = true,
+    required BuildContext context,
+  }) {
     final theme = Theme.of(context ?? Get.context!);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
@@ -133,7 +131,9 @@ class MoreBottomSheetView extends StatelessWidget {
       if (content != null)
         Text(
           content,
-          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
         ),
       if (children != null) ...children,
     ];
@@ -154,39 +154,46 @@ class MoreBottomSheetView extends StatelessWidget {
                 ),
               ),
               Spacer(),
-              IconButton(onPressed: () => showCupertinoModalBottomSheet(
-    topRadius: const Radius.circular(25),
-    context: context,
-    backgroundColor: Theme.of(context).canvasColor,
-    builder: (context) => MoreBottomSettingsSheetView(),
-    ),icon: SvgPicture.asset(
-                "assets/icons/settings.svg",
-                width: 25,
-                color: colorScheme.onSurface, // textColor equivalent
-              ),)
+              IconButton(
+                onPressed: () => showCupertinoModalBottomSheet(
+                  topRadius: const Radius.circular(25),
+                  context: context,
+                  backgroundColor: Theme.of(context).canvasColor,
+                  builder: (context) => MoreBottomSettingsSheetView(),
+                ),
+                icon: SvgPicture.asset(
+                  "assets/icons/settings.svg",
+                  width: 25,
+                  color: colorScheme.onSurface, // textColor equivalent
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           isVertical
               ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: items
-                .map((item) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: item,
-            ))
-                .toList(),
-          )
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: items
+                      .map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 3),
+                          child: item,
+                        ),
+                      )
+                      .toList(),
+                )
               : Row(
-            children: items
-                .map((item) => Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: item,
-              ),
-            ))
-                .toList(),
-          ),
+                  children: items
+                      .map(
+                        (item) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: item,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
         ],
       ),
     );
@@ -194,10 +201,13 @@ class MoreBottomSheetView extends StatelessWidget {
 
   // 🔹 Extracted static launch methods (so buttons can be const)
   static void _launchEmail() => EasyLauncher.url(
-    url: 'mailto:baltcode.app@gmail.com?subject=${Uri.encodeComponent('App watchy contact')}',
+    url:
+        'mailto:baltcode.app@gmail.com?subject=${Uri.encodeComponent('App watchy contact')}',
   );
 
-  static void _launchGithub() => EasyLauncher.url(url: "https://github.com/azizbalti82/modern-pdf-reader-for-android");
+  static void _launchGithub() => EasyLauncher.url(
+    url: "https://github.com/azizbalti82/modern-pdf-reader-for-android",
+  );
 
   static void _launchWebsite() =>
       EasyLauncher.url(url: "https://azizbalti.netlify.app");
@@ -223,16 +233,18 @@ class MoreBottomSettingsSheetView extends StatelessWidget {
     ('Date Added (old first)', 'date_old'),
   ];
 
-  static const _gridOptions = [
-    ('Grid view', true),
-    ('List view', false),
-  ];
+  static const _gridOptions = [('Grid view', true), ('List view', false)];
 
-  static const _columnOptions = [(2, '2 Columns'), (3, '3 Columns'), (4, '4 Columns')];
+  static const _columnOptions = [
+    (2, '2 Columns'),
+    (3, '3 Columns'),
+    (4, '4 Columns'),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     final colorScheme = Theme.of(context).colorScheme;
 
     return SingleChildScrollView(
@@ -283,10 +295,14 @@ class MoreBottomSettingsSheetView extends StatelessWidget {
   );
 
   Widget _buildSortButton() => PullDownButton(
-    itemBuilder: (_) => _sortOptions.map((option) => PullDownMenuItem(
-      title: option.$1,
-      onTap: () => _updateSort(option.$2),
-    )).toList(),
+    itemBuilder: (_) => _sortOptions
+        .map(
+          (option) => PullDownMenuItem(
+            title: option.$1,
+            onTap: () => _updateSort(option.$2),
+          ),
+        )
+        .toList(),
     buttonBuilder: (_, showMenu) => CustomButtonOutline(
       text: _getSortName(settingsProvider.sortBy.value),
       icon: "sort",
@@ -297,10 +313,14 @@ class MoreBottomSettingsSheetView extends StatelessWidget {
   );
 
   Widget _buildViewButton() => PullDownButton(
-    itemBuilder: (_) => _gridOptions.map((option) => PullDownMenuItem(
-      title: option.$1,
-      onTap: () => _updateView(option.$2),
-    )).toList(),
+    itemBuilder: (_) => _gridOptions
+        .map(
+          (option) => PullDownMenuItem(
+            title: option.$1,
+            onTap: () => _updateView(option.$2),
+          ),
+        )
+        .toList(),
     buttonBuilder: (_, showMenu) => CustomButtonOutline(
       text: settingsProvider.isGrid.value ? 'Grid view' : "List view",
       icon: "grid",
@@ -311,10 +331,14 @@ class MoreBottomSettingsSheetView extends StatelessWidget {
   );
 
   Widget _buildColumnButton() => PullDownButton(
-    itemBuilder: (_) => _columnOptions.map((option) => PullDownMenuItem(
-      title: option.$2,
-      onTap: () => _updateColumns(option.$1),
-    )).toList(),
+    itemBuilder: (_) => _columnOptions
+        .map(
+          (option) => PullDownMenuItem(
+            title: option.$2,
+            onTap: () => _updateColumns(option.$1),
+          ),
+        )
+        .toList(),
     buttonBuilder: (_, showMenu) => CustomButtonOutline(
       text: '${settingsProvider.colCount.value} Columns',
       icon: "grid_count",
@@ -325,26 +349,31 @@ class MoreBottomSettingsSheetView extends StatelessWidget {
   );
 
   Widget _buildSection(
-      BuildContext? context, {
-        required String title,
-        required IconData icon,
-        String? content,
-        List<Widget>? children,
-        bool isVertical = true,
-      }) {
+    BuildContext? context, {
+    required String title,
+    required IconData icon,
+    String? content,
+    List<Widget>? children,
+    bool isVertical = true,
+  }) {
     final colorScheme = Theme.of(context ?? Get.context!).colorScheme;
     final textTheme = Theme.of(context ?? Get.context!).textTheme;
 
     final items = [
       if (content != null)
-        Text(content, style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+        Text(
+          content,
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
       if (children != null) ...children,
     ];
 
     return Card(
       color: colorScheme.surface,
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: 10,left: 10,right: 10),
+      margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -366,20 +395,30 @@ class MoreBottomSettingsSheetView extends StatelessWidget {
             const SizedBox(height: 15),
             isVertical
                 ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: items.map((item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: item,
-              )).toList(),
-            )
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: items
+                        .map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 3),
+                            child: item,
+                          ),
+                        )
+                        .toList(),
+                  )
                 : Row(
-              children: items.map((item) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: item,
-                ),
-              )).toList(),
-            ),
+                    children: items
+                        .map(
+                          (item) => Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: item,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
           ],
         ),
       ),

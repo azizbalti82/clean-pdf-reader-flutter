@@ -13,6 +13,9 @@ class SettingsProvider extends GetxController {
   RxBool isLTR = false.obs;
   RxInt renderingQuality = 2.obs;
 
+  RxBool isStorageGranted = true.obs;
+
+
 
   void initSettings(bool isGrid,String sortBy,int colCount,bool isLTR,bool isYellow,bool isDark,bool isVertical,bool isContinuous,int renderingQuality,String bgColor) {
     this.colCount.value = colCount;

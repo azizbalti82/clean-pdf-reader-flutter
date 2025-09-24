@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pdf_reader/core/widgets/form.dart';
 
 import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/provider/settings_provider.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../../core/widgets/basics.dart';
 
 class HomeView extends StatelessWidget {
@@ -20,7 +22,9 @@ class HomeView extends StatelessWidget {
         // Get list depending on section - moved outside widget building
         final List<String> pdfList = _getPdfList(pdfController);
 
-        if (pdfList.isEmpty) {
+        if(!settingsProvider.isStorageGranted.value){
+          return CustomButtonOutline(icon: "",text: 'Grant Storage Permission',onPressed:()async{await requestAllFilesAccess();},isLoading: false,);
+        } else if (pdfList.isEmpty) {
           return const _EmptyStateWidget();
         }
 

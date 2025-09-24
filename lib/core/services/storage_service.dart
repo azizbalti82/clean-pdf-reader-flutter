@@ -1,9 +1,15 @@
+
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../main.dart';
+import '../provider/settings_provider.dart';
 
 bool _isRequestingPermissions = false;
 
@@ -200,5 +206,33 @@ Future<void> requestPermissions() async {
     print("Error requesting permissions: $e");
   } finally {
     _isRequestingPermissions = false;
+  }
+}
+
+
+Future<void> requestAllFilesAccess() async {
+  final SettingsProvider settingsProvider = Get.put(SettingsProvider());
+
+  if (await Permission.manageExternalStorage.isGranted) {
+    log('Already granted');
+    settingsProvider.isStorageGranted.value = true;
+    return;
+  }
+
+  // On Android 11+, request (this will redirect user to the settings screen)
+  final status = await Permission.manageExternalStorage.request();
+  if (status.isGranted) {
+    settingsProvider.isStorageGranted.value = true;
+    log('Granted!');
+  } else {
+    // If denied, open app settings as fallback
+    await openAppSettings();
+    if (!await Permission.manageExternalStorage.isGranted) {
+      settingsProvider.isStorageGranted.value = false;
+      return;
+    }else{
+      //storage just granted , load pdfs
+      loadPDFs();
+    }
   }
 }
