@@ -23,17 +23,19 @@ class MoreBottomSheetView extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          const SizedBox(height: 4),
-          _buildHandle(colorScheme),
-          _buildContactSection(context),
-          SizedBox(height: 5),
-          _buildVersionText(context),
-          const SizedBox(height: 5),
-        ],
+    return Material(
+      child:  SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            const SizedBox(height: 4),
+            _buildHandle(colorScheme),
+            _buildContactSection(context),
+            SizedBox(height: 5),
+            _buildVersionText(context),
+            const SizedBox(height: 5),
+          ],
+        ),
       ),
     );
   }
@@ -213,7 +215,7 @@ class MoreBottomSheetView extends StatelessWidget {
       EasyLauncher.url(url: "https://azizbalti.netlify.app");
 
   static void _launchRate() => EasyLauncher.url(
-    url: "https://play.google.com/store/apps/details?id=com.baltcode.watchy",
+    url: "https://play.google.com/store/apps/details?id=com.baltcode.pdf_reader",
   );
 
   static void _launchPrivacy() => EasyLauncher.url(
@@ -243,20 +245,20 @@ class MoreBottomSettingsSheetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          const SizedBox(height: 4),
-          _buildHandle(colorScheme),
-          const SizedBox(height: 10),
-          _buildSettingsSection(context),
-          const SizedBox(height: 10),
-        ],
+    return Material(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            const SizedBox(height: 4),
+            _buildHandle(colorScheme),
+            const SizedBox(height: 10),
+            _buildSettingsSection(context),
+            const SizedBox(height: 10),
+          ],
+        ),
       ),
     );
   }

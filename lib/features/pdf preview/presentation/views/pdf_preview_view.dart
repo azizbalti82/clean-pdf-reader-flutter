@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data'; // For Uint8List
 
@@ -15,7 +16,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path_ob;
 import 'package:pdf_reader/core/utils/tools.dart';
 import 'package:pdf_reader/core/widgets/toasts.dart';
-import 'package:pdf_reader/features/pdf%20preview/presentation/views/widgets/pdf_options_bottom_sheet_view.dart';
+import 'package:pdf_reader/features/pdf%20preview/presentation/views/widgets/pdf_preview_options_bottom_sheet_view.dart';
 
 import '../../../../core/provider/lists_provider.dart';
 import '../../../../core/provider/settings_provider.dart';
@@ -50,6 +51,8 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   Timer? _debounceTimer;
   late bool isVertical;
   late String bgColor;
+  late Key? pdfKey = widget.key;
+  int? _cachedPageCount;
 
   @override
   void initState() {
@@ -60,7 +63,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     settingsProvider = Get.put(SettingsProvider());
     isVertical = settingsProvider.isVertical.value;
     bgColor = settingsProvider.bgColor.value;
-
 
     WidgetsBinding.instance.addObserver(this);
     resetTimer();
@@ -87,7 +89,8 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (isVertical != settingsProvider.isVertical.value || bgColor != settingsProvider.bgColor.value) {
+      if (isVertical != settingsProvider.isVertical.value ||
+          bgColor != settingsProvider.bgColor.value) {
         isVertical = settingsProvider.isVertical.value;
         bgColor = settingsProvider.bgColor.value;
 
@@ -96,9 +99,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
           Navigator.pop(context);
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) => PdfPreviewView(pdfPath: pdfPath,),
-            ),
+            MaterialPageRoute(builder: (_) => PdfPreviewView(pdfPath: pdfPath)),
           );
         });
       }
@@ -158,9 +159,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
               )
             : SizedBox(
                 width: double.infinity,
-                child: SizedBox.expand(
-                  child: pdfViewer(),
-                ),
+                child: SizedBox.expand(child: pdfViewer(pdfKey)),
               ),
         AnimatedPositioned(
           duration: const Duration(milliseconds: 500),
@@ -211,8 +210,8 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
                       ),
                     ),
                     IconButton(
-                      onPressed: () {
-                        showCupertinoModalBottomSheet(
+                      onPressed: () async {
+                        await showCupertinoModalBottomSheet(
                           topRadius: const Radius.circular(25),
                           context: context,
                           builder: (context) {
@@ -220,6 +219,10 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
                             return PdfPreviewOptionsBottomSheetView();
                           },
                         );
+
+                        setState(() {
+                          pdfKey = UniqueKey();
+                        });
                       },
                       icon: SvgPicture.asset(
                         "assets/icons/parameter.svg",
@@ -252,6 +255,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
             ),
           ),
         ),
+        /*
         FutureBuilder(
           future: pdfCtrl.future,
           builder: (context, snapshot) {
@@ -261,7 +265,6 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
                 builder: (context, countSnapshot) {
                   if (countSnapshot.hasData) {
                     int count = countSnapshot.data ?? 1;
-
                     return AnimatedPositioned(
                       duration: const Duration(milliseconds: 500),
                       curve: Curves.easeInOut,
@@ -304,6 +307,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
                       ),
                     );
                   } else {
+                    log("el aasba");
                     return const SizedBox(); // loading or empty
                   }
                 },
@@ -313,6 +317,68 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
             }
           },
         ),
+
+         */
+        // Then use this improved version:
+        FutureBuilder(
+          future: pdfCtrl.future,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return FutureBuilder<int?>(
+                future: snapshot.data?.getPageCount(),
+                builder: (context, countSnapshot) {
+                  // Show the widget even while loading, using cached or default count
+                  int count = countSnapshot.data ?? _cachedPageCount ?? 1;
+
+                  // Update cache when data arrives
+                  if (countSnapshot.hasData && countSnapshot.data != null) {
+                    _cachedPageCount = countSnapshot.data;
+                  }
+
+                  return AnimatedPositioned(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeInOut,
+                    bottom: isOptionsShown ? 0 : -100,
+                    left: 10,
+                    right: 10,
+                    child: AnimatedOpacity(
+                      opacity: isOptionsShown ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: InkWell(
+                          onTap: goToPage,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 5,
+                              horizontal: 10,
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 40,
+                              horizontal: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withOpacity(0.4),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Text("${currentPage + 1} / $count"),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            } else {
+              return const SizedBox();
+            }
+          },
+        )
       ],
     );
   }
@@ -344,7 +410,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   }
 
   Widget buildFilteredPDFViewer(String type) {
-    Widget pdfWidget = pdfViewer();
+    Widget pdfWidget = pdfViewer(pdfKey);
     ColorFilter? filter = type == "dark"
         ? ColorFilter.matrix([
             -1.0,
@@ -402,7 +468,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
     return pdfWidget;
   }
 
-  Widget pdfViewer() {
+  Widget pdfViewer(Key? key) {
     return Stack(
       children: [
         Directionality(
@@ -411,10 +477,11 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
               ? TextDirection.ltr
               : TextDirection.rtl,
           child: PDFView(
+            key: key,
             filePath: pdfPath,
             defaultPage: currentPage,
             enableSwipe: true,
-            swipeHorizontal:!settingsProvider.isVertical.value,
+            swipeHorizontal: !settingsProvider.isVertical.value,
             autoSpacing: !settingsProvider.isContinuous.value,
             fitPolicy: settingsProvider.isVertical.value
                 ? FitPolicy.WIDTH
@@ -473,7 +540,9 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
   /// functions ----------------------------------------------------------------
   void goToPage() async {
     try {
-      final controller = TextEditingController(text: (currentPage+1).toString());
+      final controller = TextEditingController(
+        text: (currentPage + 1).toString(),
+      );
       var _controller = await pdfCtrl.future;
       int count = await _controller.getPageCount() ?? 1;
       final newValue = await showDialog<String>(
@@ -505,7 +574,7 @@ class _PdfPreviewViewState extends State<PdfPreviewView>
                 final input = controller.text.trim();
                 if (_isValidInput(input, count)) {
                   Navigator.pop(context, input);
-                  _controller.setPage(int.parse(input)-1);
+                  _controller.setPage(int.parse(input) - 1);
                   setState(() {});
                 } else {
                   Toast.showError("Enter a number from 1 to $count", context);
