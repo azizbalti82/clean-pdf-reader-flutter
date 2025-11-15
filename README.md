@@ -19,7 +19,7 @@
 ---
 ## 🌐 Release
 
-Check out the project in action: [Download](https://github.com/azizbalti82/clean-pdf-reader-flutter/releases)
+Check out the project in action: [Download](https://play.google.com/store/apps/details?id=com.baltcode.pdf_reader)
 
 ---
 
